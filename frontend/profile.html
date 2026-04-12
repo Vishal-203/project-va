@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Profile | AI Study Assistant</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="notebook.html">Notebook</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
+<div class="container">
+<h1>User Profile</h1>
+<div class="grid-2">
+  <div class="card">
+    <h3>Profile Information</h3>
+    <p id="profile-msg" style="color:green;"></p>
+    <div>
+      <label>Name:</label>
+      <input id="profile-name" class="input-field" placeholder="Your name" />
+      <button class="btn" id="update-profile-btn">Update Name</button>
+    </div>
+    <div>
+      <label>Email:</label>
+      <input id="profile-email" class="input-field" disabled placeholder="Your email" />
+      <small style="color:#999;">Email cannot be changed</small>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3>Statistics</h3>
+    <div id="stats-container">
+      <p>Loading...</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Change Password</h3>
+  <p id="password-msg" style="color:green;"></p>
+  <input id="old-password" class="input-field" type="password" placeholder="Current password" />
+  <input id="new-password" class="input-field" type="password" placeholder="New password (min 6 chars)" />
+  <input id="confirm-password" class="input-field" type="password" placeholder="Confirm new password" />
+  <button class="btn" id="change-password-btn">Change Password</button>
+</div>
+
+<div class="card">
+  <h3>Theme</h3>
+  <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+    <input type="checkbox" id="dark-mode-toggle" />
+    <span>Enable Dark Mode</span>
+  </label>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+requireAuth();
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+async function loadProfile() {
+  const res = await apiFetch('/user/profile');
+  if(res.success) {
+    document.getElementById('profile-name').value = res.data.name || '';
+    document.getElementById('profile-email').value = res.data.email || '';
+  }
+}
+
+async function loadStats() {
+  const res = await apiFetch('/user/stats');
+  if(res.success) {
+    const stats = res.data;
+    document.getElementById('stats-container').innerHTML = `
+      <p><strong>Notes:</strong> ${stats.notes}</p>
+      <p><strong>Total Tasks:</strong> ${stats.total_tasks}</p>
+      <p><strong>Completed:</strong> ${stats.completed_tasks}</p>
+      <p><strong>Pending:</strong> ${stats.pending_tasks}</p>
+    `;
+  }
+}
+
+document.getElementById('update-profile-btn').onclick = async () => {
+  const name = document.getElementById('profile-name').value.trim();
+  if(!name) { alert('Name is required'); return; }
+  const res = await apiFetch('/user/profile', 'PUT', {name});
+  if(res.success) {
+    showMsg(document.getElementById('profile-msg'), 'Profile updated successfully');
+    localStorage.setItem('user', JSON.stringify({...user, name}));
+  } else {
+    alert(res.message);
+  }
+};
+
+document.getElementById('change-password-btn').onclick = async () => {
+  const old_pwd = document.getElementById('old-password').value;
+  const new_pwd = document.getElementById('new-password').value;
+  const confirm_pwd = document.getElementById('confirm-password').value;
+  
+  if(!old_pwd || !new_pwd || !confirm_pwd) { alert('All fields required'); return; }
+  if(new_pwd !== confirm_pwd) { alert('New passwords do not match'); return; }
+  if(new_pwd.length < 6) { alert('New password must be at least 6 characters'); return; }
+  
+  const res = await apiFetch('/user/change-password', 'POST', {old_password:old_pwd, new_password:new_pwd});
+  if(res.success) {
+    showMsg(document.getElementById('password-msg'), 'Password changed successfully');
+    document.getElementById('old-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+  } else {
+    alert(res.message);
+  }
+};
+
+// Dark mode toggle
+initDarkMode();
+
+document.getElementById('logout').onclick = () => { clearToken(); localStorage.removeItem('user'); window.location='index.html'; };
+
+loadProfile();
+loadStats();
+</script>
+</body>
+</html>

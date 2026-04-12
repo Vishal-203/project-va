@@ -1,0 +1,11 @@
+flask
+flask-pymongo
+python-dotenv
+bcrypt
+flask-cors
+openai
+flask-jwt-extended
+pypdf
+python-docx
+pillow
+pytesseract

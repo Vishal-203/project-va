@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Digital Notebook | AI Study Assistant</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="profile.html">Profile</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
+<div class="container">
+<h1>Digital Notebook</h1>
+<div class="card">
+<h3>New Note</h3>
+<input id="note-subject" class="input-field" placeholder="Subject" />
+<input id="note-topic" class="input-field" placeholder="Topic" />
+<textarea id="note-content" class="input-field" rows="4" placeholder="Write notes..."></textarea>
+<input id="note-tags" class="input-field" placeholder="Tags (comma-separated, e.g: important, review, urgent)" />
+<button class="btn" id="save-note">Save Note</button>
+</div>
+<div class="card">
+<h3>Draw & Save</h3>
+<canvas id="canvas" width="760" height="320" style="border:2px solid #667eea; width:100%; cursor:crosshair; background:#fafafa; border-radius:6px;"></canvas><br>
+<button class="btn" id="clear-canvas">Clear Canvas</button>
+<button class="btn" id="save-drawing">Save Drawing</button>
+<p id="drawing-msg" style="color:green; font-size:0.9rem;"></p>
+</div>
+<div class="card">
+<h3>📋 My Notes</h3>
+<input id="filter-input" class="input-field" placeholder="Filter by subject or topic" />
+<ul id="note-list"></ul>
+<div id="note-pagination" style="display:flex; gap:0.5rem; align-items:center; margin-top:1rem;"></div>
+</div>
+
+<div class="card">
+<h3>📁 File Upload</h3>
+<input id="file-input" type="file" class="input-field" />
+<button class="btn" id="upload-file">Upload File</button>
+<p id="file-msg" style="display:none; font-size:0.9rem; margin-top:0.75rem;"></p>
+<h4>Uploaded Files</h4>
+<ul id="file-list"></ul>
+</div>
+
+<div class="card">
+<h3>👥 Notes Shared With Me</h3>
+<ul id="shared-note-list"></ul>
+</div>
+
+<div id="share-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+<div class="card" style="max-width:500px; width:90%; margin:0;">
+<h3>Share Note</h3>
+<p id="share-msg" style="color:red;"></p>
+<input id="share-email" class="input-field" placeholder="Enter user email to share with" />
+<div style="display:flex; gap:0.5rem;">
+<button class="btn" id="confirm-share">Share</button>
+<button class="btn" onclick="closeShareModal()" style="background:#999;">Cancel</button>
+</div>
+<hr style="margin:1rem 0;">
+<h4>Currently shared with:</h4>
+<ul id="share-list" style="max-height:200px; overflow-y:auto;"></ul>
+</div>
+</div>
+
+<script src="app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+requireAuth();
+initDarkMode();
+const ctx = document.getElementById('canvas').getContext('2d');
+let painting=false;
+let notePage = 1;
+const noteLimit = 10;
+function start(){painting=true;}
+function stop(){painting=false; ctx.beginPath();}
+function draw(e){ if(!painting) return; const rect = e.target.getBoundingClientRect(); ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle = '#667eea'; ctx.lineTo(e.clientX-rect.left, e.clientY-rect.top); ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.clientX-rect.left, e.clientY-rect.top); }
+document.getElementById('canvas').addEventListener('mousedown', start);
+document.getElementById('canvas').addEventListener('mouseup', stop);
+document.getElementById('canvas').addEventListener('mousemove', draw);
+
+document.getElementById('clear-canvas').onclick = () => ctx.clearRect(0,0,760,320);
+
+document.getElementById('logout').onclick = () => {clearToken(); localStorage.removeItem('user'); window.location='index.html';};
+
+async function loadNotes(filter=''){ const r = await apiFetch(`/notes?page=${notePage}&limit=${noteLimit}`); if(!r.success) return; const list = document.getElementById('note-list'); const pagination = document.getElementById('note-pagination'); list.innerHTML=''; pagination.innerHTML=''; const notes = Array.isArray(r.data.items) ? r.data.items : []; const filtered = notes.filter(n => `${n.subject} ${n.topic} ${(n.tags||[]).join(' ')}`.toLowerCase().includes(filter.toLowerCase())); if(filtered.length === 0){ list.innerHTML = '<li><em>No notes found.</em></li>'; } else { filtered.forEach(n=>{ const li = document.createElement('li'); li.className='card'; li.style.listStyle='none'; const tagsHtml = (n.tags||[]).length > 0 ? `<div style="margin-bottom:0.5rem;">${n.tags.map(t=>`<span style="display:inline-block; background:#667eea; color:white; padding:0.2rem 0.5rem; border-radius:3px; font-size:0.8rem; margin-right:0.3rem;">${t}</span>`).join('')}</div>` : ''; li.innerHTML=`<strong>${n.subject} / ${n.topic}</strong><br>${tagsHtml}${n.content ? n.content : '<em>No content</em>'}<br><button class="btn" onclick="editNote('${n.id}')">Edit</button><button class="btn" onclick="exportPDF('${n.id}')">Export PDF</button><button class="btn" onclick="openShareModal('${n.id}')">Share 👥</button><button class="btn" onclick="deleteNote('${n.id}')">Delete</button>`; list.appendChild(li); }); } updateNotePagination(r.data); }
+
+function updateNotePagination(pageData){ const pagination = document.getElementById('note-pagination'); if(!pageData || pageData.pages <= 1){ pagination.innerHTML=''; return; } pagination.innerHTML = `<button class="btn" ${pageData.page <= 1 ? 'disabled' : ''} onclick="changeNotePage(-1)">Prev</button><span style="font-size:0.95rem; color:#555;">Page ${pageData.page} of ${pageData.pages} (${pageData.total} notes)</span><button class="btn" ${pageData.page >= pageData.pages ? 'disabled' : ''} onclick="changeNotePage(1)">Next</button>`; }
+
+window.changeNotePage = (delta) => { notePage = Math.max(1, notePage + delta); loadNotes(document.getElementById('filter-input').value); };
+
+async function loadSharedNotes() {
+  const res = await apiFetch('/notes/shared');
+  const list = document.getElementById('shared-note-list');
+  if (!res.success || !res.data || res.data.length === 0) {
+    list.innerHTML = '<li><em>No notes shared with you yet</em></li>';
+    return;
+  }
+  list.innerHTML = '';
+  res.data.forEach(n => {
+    const li = document.createElement('li');
+    li.className = 'card';
+    li.style.listStyle = 'none';
+    const owner = n.user_id ? n.user_id.substring(0, 8) + '...' : 'Unknown';
+    li.innerHTML = `
+      <strong>${n.subject} / ${n.topic}</strong>
+      <small style="color:#999;">Shared by: ${owner}</small><br>
+      ${n.content ? n.content : '<em>No content</em>'}<br>
+      <button class="btn" onclick="viewNote('${n.id}')">View</button>
+      <button class="btn" onclick="exportPDF('${n.id}')">Export PDF</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+window.openShareModal = async(noteId) => {
+  document.getElementById('share-email').value = '';
+  document.getElementById('share-msg').textContent = '';
+  document.getElementById('share-modal').style.display = 'flex';
+  document.getElementById('share-modal').noteId = noteId;
+  
+  // Load current shares
+  const res = await apiFetch(`/notes/${noteId}/shares`);
+  const shareList = document.getElementById('share-list');
+  if (res.success && res.data.length > 0) {
+    shareList.innerHTML = res.data.map(u => `
+      <li style="padding:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+        <span>${u.name} (${u.email})</span>
+        <button class="btn" onclick="unshareNote('${noteId}', '${u.id}')" style="padding:0.3rem 0.6rem; font-size:0.8rem;">Remove</button>
+      </li>
+    `).join('');
+  } else {
+    shareList.innerHTML = '<li><em>Not shared yet</em></li>';
+  }
+};
+
+window.closeShareModal = () => {
+  document.getElementById('share-modal').style.display = 'none';
+};
+
+window.shareNote = async(noteId, email) => {
+  const res = await apiFetch(`/notes/${noteId}/share`, 'POST', { email });
+  if (res.success) {
+    document.getElementById('share-msg').style.color = 'green';
+    document.getElementById('share-msg').textContent = 'Note shared successfully!';
+    document.getElementById('share-email').value = '';
+    setTimeout(() => openShareModal(noteId), 1000);
+  } else {
+    document.getElementById('share-msg').style.color = 'red';
+    document.getElementById('share-msg').textContent = res.message;
+  }
+};
+
+window.unshareNote = async(noteId, userId) => {
+  const res = await apiFetch(`/notes/${noteId}/share/${userId}`, 'DELETE');
+  if (res.success) {
+    openShareModal(noteId);
+  } else {
+    alert(res.message);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('confirm-share').onclick = () => {
+    const email = document.getElementById('share-email').value.trim();
+    const noteId = document.getElementById('share-modal').noteId;
+    if (!email) { alert('Please enter an email'); return; }
+    shareNote(noteId, email);
+  };
+
+  document.getElementById('upload-file').onclick = async () => {
+    const input = document.getElementById('file-input');
+    const file = input.files[0];
+    const msgEl = document.getElementById('file-msg');
+    if (!file) { showMsg(msgEl, 'Please select a file to upload.'); return; }
+
+    const allowed = ['pdf','txt','jpg','jpeg','png','docx','doc'];
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!allowed.includes(ext)) {
+      showMsg(msgEl, `Invalid file type. Allowed: ${allowed.join(', ')}`);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiUpload('/files', formData);
+    if (!res.success) {
+      showMsg(msgEl, res.message);
+      return;
+    }
+
+    input.value = '';
+    showMsg(msgEl, 'File uploaded successfully.');
+    loadFiles();
+  };
+
+  loadFiles();
+});
+
+async function loadFiles() {
+  const res = await apiFetch('/files');
+  const list = document.getElementById('file-list');
+  if (!res.success || !Array.isArray(res.data) || res.data.length === 0) {
+    list.innerHTML = '<li><em>No uploaded files yet.</em></li>';
+    return;
+  }
+
+  list.innerHTML = '';
+  res.data.forEach(file => {
+    const li = document.createElement('li');
+    li.className = 'card';
+    li.style.listStyle = 'none';
+    li.style.marginBottom = '0.75rem';
+    const sizeKb = (file.size / 1024).toFixed(1);
+    li.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+        <div>
+          <strong>${file.filename}</strong><br>
+          <small>${sizeKb} KB • ${file.type.toUpperCase()}</small>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <button class="btn" onclick="downloadFile('${file.id}')">Download</button>
+          <button class="btn" onclick="deleteFile('${file.id}')">Delete</button>
+        </div>
+      </div>`;
+    list.appendChild(li);
+  });
+}
+
+window.deleteFile = async (fileId) => {
+  if (!confirm('Delete this file?')) return;
+  const res = await apiFetch(`/files/${fileId}`, 'DELETE');
+  if (!res.success) { alert(res.message); return; }
+  loadFiles();
+};
+
+window.downloadFile = async (fileId) => {
+  const token = getToken();
+  const res = await fetch(`${API_URL}/files/${fileId}/download`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    alert('Download failed.');
+    return;
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+loadNotes();
+loadSharedNotes();
+
+document.getElementById('filter-input').oninput = (e)=> { notePage = 1; loadNotes(e.target.value); };
+
+document.getElementById('save-note').onclick = async ()=>{
+  const sub=document.getElementById('note-subject').value.trim(); const top=document.getElementById('note-topic').value.trim(); const content=document.getElementById('note-content').value;
+  const tagsInput = document.getElementById('note-tags').value.trim();
+  const tags = tagsInput ? tagsInput.split(',').map(t=>t.trim()).filter(t=>t) : [];
+  if(!sub || !top) { alert('Subject and topic are required'); return; }
+  const res=await apiFetch('/notes','POST',{subject:sub,topic:top,content,tags}); if(!res.success){alert(res.message);return;} document.getElementById('note-subject').value=''; document.getElementById('note-topic').value=''; document.getElementById('note-content').value=''; document.getElementById('note-tags').value=''; notePage = 1; loadNotes(); const msgEl = document.createElement('div'); msgEl.style.cssText = 'padding:0.8rem;border-radius:6px;margin-bottom:1rem;background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;'; msgEl.textContent = 'Note saved successfully'; document.querySelector('.card').appendChild(msgEl); setTimeout(()=>msgEl.remove(), 3000); };
+
+document.getElementById('save-drawing').onclick=async()=>{ const sub=document.getElementById('note-subject').value.trim(); const top=document.getElementById('note-topic').value.trim(); if(!sub||!top){alert('Add subject and topic first');return;} const drawing = document.getElementById('canvas').toDataURL(); const res=await apiFetch('/notes','POST',{subject:sub,topic:top,content:'[Canvas Drawing]',drawing}); if(!res.success){alert(res.message);return;} document.getElementById('note-subject').value=''; document.getElementById('note-topic').value=''; ctx.clearRect(0,0,760,320); notePage = 1; loadNotes(); showMsg(document.getElementById('drawing-msg'), 'Drawing saved'); };
+
+window.editNote = async(id)=>{ const r=await apiFetch(`/notes/${id}`); if(!r.success){alert(r.message);return;} if(r.data.is_owner === false) { alert('Cannot edit notes shared with you'); return; } const note=r.data; document.getElementById('note-subject').value=note.subject; document.getElementById('note-topic').value=note.topic; document.getElementById('note-content').value=note.content||''; if(note.drawing){ const img = new Image(); img.onload=()=>ctx.drawImage(img,0,0,760,320); img.src=note.drawing; } document.getElementById('save-note').onclick=async()=>{ const sub=document.getElementById('note-subject').value.trim(); const top=document.getElementById('note-topic').value.trim(); const content=document.getElementById('note-content').value; const resp=await apiFetch(`/notes/${id}`,'PUT',{subject:sub,topic:top,content}); if(!resp.success){alert(resp.message);return;} alert('Note updated'); loadNotes(); }};
+
+window.viewNote = async(id)=>{ const r=await apiFetch(`/notes/${id}`); if(!r.success){alert(r.message);return;} const note=r.data; alert(`Subject: ${note.subject}\nTopic: ${note.topic}\n\nContent:\n${note.content || 'No content'}`); };
+
+window.deleteNote = async(id)=>{ if(!confirm('Delete note?')) return; const r=await apiFetch(`/notes/${id}`,'DELETE'); if(!r.success){alert(r.message);return;} loadNotes(); };
+
+window.exportPDF = async(id) => {
+  const r = await apiFetch(`/notes/${id}`);
+  if(!r.success) { alert(r.message); return; }
+  const note = r.data;
+  const element = document.createElement('div');
+  element.innerHTML = `
+    <h2>${note.subject}</h2>
+    <p><strong>Topic:</strong> ${note.topic}</p>
+    ${note.tags && note.tags.length > 0 ? `<p><strong>Tags:</strong> ${note.tags.join(', ')}</p>` : ''}
+    <p><strong>Created:</strong> ${new Date(note.created_at).toLocaleDateString()}</p>
+    <hr>
+    <p>${note.content.replace(/\n/g, '<br>')}</p>
+  `;
+  const opt = {
+    margin: 10,
+    filename: `${note.subject}-${note.topic}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+  };
+  html2pdf().set(opt).from(element).save();
+};
+
+</script>
+</body>
+</html>

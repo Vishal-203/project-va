@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Dashboard | AI Study Assistant</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="navbar"><div>📚 AI Study Assistant</div><div><a href="profile.html">👤 Profile</a><a href="notebook.html">📝 Notebook</a><a href="ai_assistant.html">🤖 AI</a><a href="planner.html">📋 Planner</a><a href="#" id="logout">🚪 Logout</a></div></div>
+<div class="container">
+<h1>✨ Welcome Back!</h1>
+<div class="grid-2">
+  <div class="card">
+    <h3>👤 Profile</h3>
+    <p id="user-name" style="font-size:1.2rem; color:#667eea; font-weight:600;"></p>
+    <p id="user-email" style="color:#999;"></p>
+    <a href="profile.html" class="btn">View Profile →</a>
+  </div>
+  
+  <div class="card">
+    <h3>📊 Quick Stats</h3>
+    <div id="quick-stats">
+      <p>🔄 Loading stats...</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>⚡ Quick Actions</h3>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-top:1rem;">
+    <button class="btn" onclick="window.location='notebook.html'">📝 Create Note</button>
+    <button class="btn" onclick="window.location='planner.html'">📋 Add Task</button>
+    <button class="btn" onclick="window.location='ai_assistant.html'">🤖 Ask AI</button>
+    <button class="btn" onclick="window.location='profile.html'">⚙️ Settings</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>📚 Recent Notes</h3>
+  <div id="recent-notes-container">
+    <p>📖 Loading your notes...</p>
+  </div>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+requireAuth();
+initDarkMode();
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+if(user.name){ 
+  document.getElementById('user-name').textContent = user.name; 
+  document.getElementById('user-email').textContent = user.email; 
+}
+
+async function loadStats() {
+  const res = await apiFetch('/user/stats');
+  if(res.success) {
+    const s = res.data;
+    document.getElementById('quick-stats').innerHTML = `
+      <p style="margin:0.5rem 0;"><strong>📝 Notes:</strong> <span style="color:#667eea; font-weight:600;">${s.notes}</span></p>
+      <p style="margin:0.5rem 0;"><strong>📋 Total Tasks:</strong> <span style="color:#ff9800; font-weight:600;">${s.total_tasks}</span></p>
+      <p style="margin:0.5rem 0;"><strong>✅ Completed:</strong> <span style="color:#4caf50; font-weight:600;">${s.completed_tasks}</span></p>
+      <p style="margin:0.5rem 0;"><strong>⏳ Pending:</strong> <span style="color:#f44336; font-weight:600;">${s.pending_tasks}</span></p>
+    `;
+  }
+}
+
+async function loadRecentNotes() { 
+  const res = await apiFetch('/notes'); 
+  if(res.success && res.data.length > 0) { 
+    const container = document.getElementById('recent-notes-container'); 
+    container.innerHTML = '<ul style="list-style:none; padding:0;">'; 
+    res.data.slice(0, 5).forEach(n => { 
+      const date = new Date(n.updated_at).toLocaleDateString();
+      container.innerHTML += `
+        <li style="padding:0.8rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong>${n.subject}</strong><br>
+            <small style="color:#999;">${n.topic} • ${date}</small>
+          </div>
+          <span style="font-size:1.2rem;">📄</span>
+        </li>
+      `; 
+    });
+    container.innerHTML += '</ul>';
+  } else if(res.success) {
+    document.getElementById('recent-notes-container').innerHTML = '<p>📝 No notes yet. <a href="notebook.html">Create your first note</a></p>';
+  }
+}
+
+document.getElementById('logout').onclick = () => { 
+  clearToken(); 
+  localStorage.removeItem('user'); 
+  window.location='index.html'; 
+};
+
+loadStats();
+loadRecentNotes();
+</script>
+</body>
+</html>

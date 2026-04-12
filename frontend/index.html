@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Study Assistant - Login</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="navbar"><div>AI Study Assistant</div><div><a href="register.html">Register</a></div></div>
+<div class="container">
+<div class="card">
+<h2>Login</h2>
+<p id="login-msg" style="color:red"></p>
+<input id="email" class="input-field" placeholder="Email" type="email" required />
+<input id="password" class="input-field" placeholder="Password" type="password" required />
+<button class="btn" id="login-btn">Login</button>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+const loginBtn = document.getElementById('login-btn');
+loginBtn.onclick = async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const result = await apiFetch('/auth/login', 'POST', { email, password });
+  if (!result.success) { showMsg(document.getElementById('login-msg'), result.message); return; }
+  setToken(result.data.token); localStorage.setItem('user', JSON.stringify(result.data.user));
+  window.location.href='dashboard.html';
+};
+</script>
+</body>
+</html>
