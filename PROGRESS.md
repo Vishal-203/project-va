@@ -41,7 +41,7 @@ GET    /api/notes/<id>/shares            - List shares
 
 **Configuration:**
 - Allowed types: PDF, TXT, JPG, PNG, DOCX, DOC
-- Max size: 10MB per file
+- Max size: 20MB per file
 - Storage: `/backend/uploads/` folder
 - Files are user-isolated (can only download own files)
 

@@ -1,14 +1,13 @@
 import os
+from io import BytesIO
 
-from datetime import datetime
 from flask_jwt_extended import get_jwt_identity
-from bson.objectid import ObjectId
 from PIL import Image
 import pytesseract
 import docx
 from pypdf import PdfReader
 
-from utils.helpers import parse_object_id, resp
+from utils.helpers import parse_object_id
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'uploads')
 MAX_TEXT_LENGTH = 10000
@@ -28,6 +27,23 @@ def _read_pdf(filepath):
             if page_text:
                 text.append(page_text)
     return '\n'.join(text)
+
+
+def _ocr_pdf_images(filepath):
+    text_chunks = []
+    with open(filepath, 'rb') as f:
+        reader = PdfReader(f)
+        for page in reader.pages:
+            images = getattr(page, 'images', None) or []
+            for image_file in images:
+                try:
+                    image = Image.open(BytesIO(image_file.data))
+                    ocr_text = pytesseract.image_to_string(image)
+                    if ocr_text and ocr_text.strip():
+                        text_chunks.append(ocr_text)
+                except Exception:
+                    continue
+    return '\n'.join(text_chunks)
 
 
 def _read_docx(filepath):
@@ -71,6 +87,8 @@ def extract_text_from_file(app, file_id):
             text = _read_txt(filepath)
         elif file_type == 'pdf':
             text = _read_pdf(filepath)
+            if not _normalize_text(text):
+                text = _ocr_pdf_images(filepath)
         elif file_type in ('docx', 'doc'):
             text = _read_docx(filepath)
         elif file_type in ('jpg', 'jpeg', 'png'):
@@ -82,6 +100,16 @@ def extract_text_from_file(app, file_id):
 
     normalized = _normalize_text(text)
     if not normalized.strip():
-        return {'success': False, 'message': 'No text could be extracted from the file', 'status': 400}
+        if file_type == 'pdf':
+            return {
+                'success': False,
+                'message': 'No readable text found. The PDF may be scanned, image-based, or OCR is unavailable.',
+                'status': 400
+            }
+        return {
+            'success': False,
+            'message': 'No readable text found in the file.',
+            'status': 400
+        }
 
     return {'success': True, 'data': {'text': normalized, 'filename': file_doc.get('original_filename')}}

@@ -11,7 +11,7 @@ from utils.helpers import parse_object_id, resp
 # Configure file upload
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'uploads')
 ALLOWED_EXTENSIONS = {'pdf', 'txt', 'jpg', 'jpeg', 'png', 'docx', 'doc'}
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 
 # Create uploads folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -53,7 +53,7 @@ def upload_file(app):
         file_size = os.path.getsize(filepath)
         if file_size > MAX_FILE_SIZE:
             os.remove(filepath)
-            return resp(False, 'File too large (max 10MB)', status=400)
+            return resp(False, 'File too large (max 20MB)', status=400)
         
         # Store metadata in database
         file_doc = {

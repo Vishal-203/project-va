@@ -4,6 +4,11 @@ from controllers.ai_controller import answer_question, summarize_text, generate_
 
 ai_bp = Blueprint('ai', __name__)
 
+@ai_bp.route('/chat', methods=['POST'])
+@jwt_required()
+def chat():
+    return answer_question(current_app)
+
 @ai_bp.route('/ask', methods=['POST'])
 @jwt_required()
 def ask():
