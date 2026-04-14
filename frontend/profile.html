@@ -8,25 +8,32 @@
 <body>
 <div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="notebook.html">Notebook</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
 <div class="container">
-<h1>User Profile</h1>
+<section class="page-hero">
+  <p class="hero-kicker">Account Settings</p>
+  <h1>User profile</h1>
+  <p class="hero-subtitle">Manage your personal details, review your study activity, and switch between light and dark themes.</p>
+</section>
+
 <div class="grid-2">
   <div class="card">
     <h3>Profile Information</h3>
-    <p id="profile-msg" style="color:green;"></p>
+    <p class="section-intro">Update the name shown across your workspace.</p>
+    <p id="profile-msg" style="color:var(--success);"></p>
     <div>
-      <label>Name:</label>
+      <label>Name</label>
       <input id="profile-name" class="input-field" placeholder="Your name" />
       <button class="btn" id="update-profile-btn">Update Name</button>
     </div>
     <div>
-      <label>Email:</label>
+      <label>Email</label>
       <input id="profile-email" class="input-field" disabled placeholder="Your email" />
-      <small style="color:#999;">Email cannot be changed</small>
+      <small>Email cannot be changed</small>
     </div>
   </div>
-  
+
   <div class="card">
     <h3>Statistics</h3>
+    <p class="section-intro">A quick overview of your note and task progress.</p>
     <div id="stats-container">
       <p>Loading...</p>
     </div>
@@ -35,7 +42,8 @@
 
 <div class="card">
   <h3>Change Password</h3>
-  <p id="password-msg" style="color:green;"></p>
+  <p class="section-intro">Use a stronger password when you want to refresh your account security.</p>
+  <p id="password-msg" style="color:var(--success);"></p>
   <input id="old-password" class="input-field" type="password" placeholder="Current password" />
   <input id="new-password" class="input-field" type="password" placeholder="New password (min 6 chars)" />
   <input id="confirm-password" class="input-field" type="password" placeholder="Confirm new password" />
@@ -44,7 +52,8 @@
 
 <div class="card">
   <h3>Theme</h3>
-  <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+  <p class="section-intro">Switch the interface mood to match your environment.</p>
+  <label style="display:flex; align-items:center; gap:0.65rem; cursor:pointer;">
     <input type="checkbox" id="dark-mode-toggle" />
     <span>Enable Dark Mode</span>
   </label>
@@ -68,10 +77,12 @@ async function loadStats() {
   if(res.success) {
     const stats = res.data;
     document.getElementById('stats-container').innerHTML = `
-      <p><strong>Notes:</strong> ${stats.notes}</p>
-      <p><strong>Total Tasks:</strong> ${stats.total_tasks}</p>
-      <p><strong>Completed:</strong> ${stats.completed_tasks}</p>
-      <p><strong>Pending:</strong> ${stats.pending_tasks}</p>
+      <div class="stat-grid">
+        <div class="stat-tile"><span class="stat-label">Notes</span><span class="stat-value">${stats.notes}</span></div>
+        <div class="stat-tile"><span class="stat-label">Total Tasks</span><span class="stat-value">${stats.total_tasks}</span></div>
+        <div class="stat-tile"><span class="stat-label">Completed</span><span class="stat-value">${stats.completed_tasks}</span></div>
+        <div class="stat-tile"><span class="stat-label">Pending</span><span class="stat-value">${stats.pending_tasks}</span></div>
+      </div>
     `;
   }
 }
@@ -92,11 +103,11 @@ document.getElementById('change-password-btn').onclick = async () => {
   const old_pwd = document.getElementById('old-password').value;
   const new_pwd = document.getElementById('new-password').value;
   const confirm_pwd = document.getElementById('confirm-password').value;
-  
+
   if(!old_pwd || !new_pwd || !confirm_pwd) { alert('All fields required'); return; }
   if(new_pwd !== confirm_pwd) { alert('New passwords do not match'); return; }
   if(new_pwd.length < 6) { alert('New password must be at least 6 characters'); return; }
-  
+
   const res = await apiFetch('/user/change-password', 'POST', {old_password:old_pwd, new_password:new_pwd});
   if(res.success) {
     showMsg(document.getElementById('password-msg'), 'Password changed successfully');
@@ -108,7 +119,6 @@ document.getElementById('change-password-btn').onclick = async () => {
   }
 };
 
-// Dark mode toggle
 initDarkMode();
 
 document.getElementById('logout').onclick = () => { clearToken(); localStorage.removeItem('user'); window.location='index.html'; };

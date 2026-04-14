@@ -8,56 +8,69 @@
 <body>
 <div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="profile.html">Profile</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
 <div class="container">
-<h1>Digital Notebook</h1>
+<section class="page-hero">
+  <p class="hero-kicker">Digital Notebook</p>
+  <h1>Write, sketch, and store study material.</h1>
+  <p class="hero-subtitle">Capture text notes, save quick diagrams, upload supporting files, and share useful material with other users.</p>
+</section>
+
 <div class="card">
-<h3>New Note</h3>
-<input id="note-subject" class="input-field" placeholder="Subject" />
-<input id="note-topic" class="input-field" placeholder="Topic" />
-<textarea id="note-content" class="input-field" rows="4" placeholder="Write notes..."></textarea>
-<input id="note-tags" class="input-field" placeholder="Tags (comma-separated, e.g: important, review, urgent)" />
-<button class="btn" id="save-note">Save Note</button>
-</div>
-<div class="card">
-<h3>Draw & Save</h3>
-<canvas id="canvas" width="760" height="320" style="border:2px solid #667eea; width:100%; cursor:crosshair; background:#fafafa; border-radius:6px;"></canvas><br>
-<button class="btn" id="clear-canvas">Clear Canvas</button>
-<button class="btn" id="save-drawing">Save Drawing</button>
-<p id="drawing-msg" style="color:green; font-size:0.9rem;"></p>
-</div>
-<div class="card">
-<h3>📋 My Notes</h3>
-<input id="filter-input" class="input-field" placeholder="Filter by subject or topic" />
-<ul id="note-list"></ul>
-<div id="note-pagination" style="display:flex; gap:0.5rem; align-items:center; margin-top:1rem;"></div>
+  <h3>New Note</h3>
+  <p class="section-intro">Use this section to write a text note with a subject, topic, and optional tags for easier search later.</p>
+  <input id="note-subject" class="input-field" placeholder="Subject" />
+  <input id="note-topic" class="input-field" placeholder="Topic" />
+  <textarea id="note-content" class="input-field" rows="4" placeholder="Write notes..."></textarea>
+  <input id="note-tags" class="input-field" placeholder="Tags (comma-separated, e.g: important, review, urgent)" />
+  <button class="btn" id="save-note">Save Note</button>
 </div>
 
 <div class="card">
-<h3>📁 File Upload</h3>
-<input id="file-input" type="file" class="input-field" />
-<button class="btn" id="upload-file">Upload File</button>
-<p id="file-msg" style="display:none; font-size:0.9rem; margin-top:0.75rem;"></p>
-<h4>Uploaded Files</h4>
-<ul id="file-list"></ul>
+  <h3>Draw & Save</h3>
+  <p class="section-intro">Use the canvas to sketch diagrams, formulas, or quick visual ideas. Clear Canvas removes the current sketch, and Save Drawing stores it as a note using the subject and topic above.</p>
+  <canvas id="canvas" width="760" height="320" style="border:2px solid var(--brand); width:100%; cursor:crosshair; background:var(--surface-strong); border-radius:16px;"></canvas><br>
+  <button class="btn btn-muted" id="clear-canvas">Clear Canvas</button>
+  <button class="btn" id="save-drawing">Save Drawing</button>
+  <p id="drawing-msg" style="color:var(--success); font-size:0.9rem;"></p>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>My Notes <span id="note-count" style="font-size:0.8rem; color:var(--text-faint);">(0)</span></h3>
+    <p class="section-intro">Search, edit, export, share, or remove your saved notes.</p>
+    <input id="filter-input" class="input-field" placeholder="Filter notes..." style="margin-bottom:0.75rem;" />
+    <ul id="note-list" style="max-height:400px; overflow-y:auto;"></ul>
+    <div id="note-pagination" style="display:flex; gap:0.5rem; align-items:center; margin-top:0.75rem; font-size:0.9rem; flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="card">
+    <h3>Files <span id="file-count" style="font-size:0.8rem; color:var(--text-faint);">(0)</span></h3>
+    <p class="section-intro">Upload PDFs, docs, text files, or images to use later with the AI assistant.</p>
+    <input id="file-input" type="file" class="input-field" style="margin-bottom:0.5rem;" />
+    <button class="btn" id="upload-file" style="width:100%; margin-bottom:0.75rem;">Upload File</button>
+    <p id="file-msg" style="display:none; font-size:0.9rem; margin-bottom:0.5rem;"></p>
+    <ul id="file-list" style="max-height:400px; overflow-y:auto;"></ul>
+  </div>
 </div>
 
 <div class="card">
-<h3>👥 Notes Shared With Me</h3>
-<ul id="shared-note-list"></ul>
+  <h3>Notes Shared With Me <span id="shared-count" style="font-size:0.8rem; color:var(--text-faint);">(0)</span></h3>
+  <p class="section-intro">Notes that other users have shared with you for reading or export.</p>
+  <ul id="shared-note-list" style="max-height:300px; overflow-y:auto;"></ul>
 </div>
 
 <div id="share-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
-<div class="card" style="max-width:500px; width:90%; margin:0;">
-<h3>Share Note</h3>
-<p id="share-msg" style="color:red;"></p>
-<input id="share-email" class="input-field" placeholder="Enter user email to share with" />
-<div style="display:flex; gap:0.5rem;">
-<button class="btn" id="confirm-share">Share</button>
-<button class="btn" onclick="closeShareModal()" style="background:#999;">Cancel</button>
-</div>
-<hr style="margin:1rem 0;">
-<h4>Currently shared with:</h4>
-<ul id="share-list" style="max-height:200px; overflow-y:auto;"></ul>
-</div>
+  <div class="card" style="max-width:500px; width:90%; margin:0;">
+    <h3>Share Note</h3>
+    <p id="share-msg" style="color:var(--danger);"></p>
+    <input id="share-email" class="input-field" placeholder="Enter user email to share with" />
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <button class="btn" id="confirm-share">Share</button>
+      <button class="btn btn-muted" onclick="closeShareModal()">Cancel</button>
+    </div>
+    <hr style="margin:1rem 0;">
+    <h4>Currently shared with:</h4>
+    <ul id="share-list" style="max-height:200px; overflow-y:auto;"></ul>
+  </div>
 </div>
 
 <script src="app.js"></script>
@@ -66,64 +79,128 @@
 requireAuth();
 initDarkMode();
 const ctx = document.getElementById('canvas').getContext('2d');
-let painting=false;
+let painting = false;
 let notePage = 1;
 const noteLimit = 10;
-function start(){painting=true;}
-function stop(){painting=false; ctx.beginPath();}
-function draw(e){ if(!painting) return; const rect = e.target.getBoundingClientRect(); ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle = '#667eea'; ctx.lineTo(e.clientX-rect.left, e.clientY-rect.top); ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.clientX-rect.left, e.clientY-rect.top); }
+
+// Starts freehand drawing when the mouse button is pressed on the canvas.
+function start(){ painting = true; }
+
+// Stops drawing and resets the current stroke path.
+function stop(){ painting = false; ctx.beginPath(); }
+
+// Draws smooth strokes on the canvas while the pointer moves.
+function draw(e){
+  if(!painting) return;
+  const rect = e.target.getBoundingClientRect();
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#0f766e';
+  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
 document.getElementById('canvas').addEventListener('mousedown', start);
 document.getElementById('canvas').addEventListener('mouseup', stop);
 document.getElementById('canvas').addEventListener('mousemove', draw);
 
+// Clears the full drawing area so the user can start over.
 document.getElementById('clear-canvas').onclick = () => ctx.clearRect(0,0,760,320);
 
-document.getElementById('logout').onclick = () => {clearToken(); localStorage.removeItem('user'); window.location='index.html';};
+// Signs the user out by removing stored auth data and returning to login.
+document.getElementById('logout').onclick = () => { clearToken(); localStorage.removeItem('user'); window.location='index.html'; };
 
-async function loadNotes(filter=''){ const r = await apiFetch(`/notes?page=${notePage}&limit=${noteLimit}`); if(!r.success) return; const list = document.getElementById('note-list'); const pagination = document.getElementById('note-pagination'); list.innerHTML=''; pagination.innerHTML=''; const notes = Array.isArray(r.data.items) ? r.data.items : []; const filtered = notes.filter(n => `${n.subject} ${n.topic} ${(n.tags||[]).join(' ')}`.toLowerCase().includes(filter.toLowerCase())); if(filtered.length === 0){ list.innerHTML = '<li><em>No notes found.</em></li>'; } else { filtered.forEach(n=>{ const li = document.createElement('li'); li.className='card'; li.style.listStyle='none'; const tagsHtml = (n.tags||[]).length > 0 ? `<div style="margin-bottom:0.5rem;">${n.tags.map(t=>`<span style="display:inline-block; background:#667eea; color:white; padding:0.2rem 0.5rem; border-radius:3px; font-size:0.8rem; margin-right:0.3rem;">${t}</span>`).join('')}</div>` : ''; li.innerHTML=`<strong>${n.subject} / ${n.topic}</strong><br>${tagsHtml}${n.content ? n.content : '<em>No content</em>'}<br><button class="btn" onclick="editNote('${n.id}')">Edit</button><button class="btn" onclick="exportPDF('${n.id}')">Export PDF</button><button class="btn" onclick="openShareModal('${n.id}')">Share 👥</button><button class="btn" onclick="deleteNote('${n.id}')">Delete</button>`; list.appendChild(li); }); } updateNotePagination(r.data); }
+// Loads notes from the API, applies the search filter, and renders the list.
+async function loadNotes(filter=''){
+  const r = await apiFetch(`/notes?page=${notePage}&limit=${noteLimit}`);
+  if(!r.success) return;
+  const list = document.getElementById('note-list');
+  const pagination = document.getElementById('note-pagination');
+  const countEl = document.getElementById('note-count');
+  list.innerHTML = '';
+  pagination.innerHTML = '';
+  const notes = Array.isArray(r.data.items) ? r.data.items : [];
+  const filtered = notes.filter(n => `${n.subject} ${n.topic} ${(n.tags||[]).join(' ')}`.toLowerCase().includes(filter.toLowerCase()));
+  countEl.textContent = `(${r.data.total || 0})`;
 
-function updateNotePagination(pageData){ const pagination = document.getElementById('note-pagination'); if(!pageData || pageData.pages <= 1){ pagination.innerHTML=''; return; } pagination.innerHTML = `<button class="btn" ${pageData.page <= 1 ? 'disabled' : ''} onclick="changeNotePage(-1)">Prev</button><span style="font-size:0.95rem; color:#555;">Page ${pageData.page} of ${pageData.pages} (${pageData.total} notes)</span><button class="btn" ${pageData.page >= pageData.pages ? 'disabled' : ''} onclick="changeNotePage(1)">Next</button>`; }
+  if(filtered.length === 0){
+    list.innerHTML = '<li><em>No notes found.</em></li>';
+  } else {
+    filtered.forEach(n => {
+      const li = document.createElement('li');
+      li.className = 'card';
+      li.style.listStyle = 'none';
+      li.style.marginBottom = '0.5rem';
+      li.style.padding = '0.75rem';
+      const tagsHtml = (n.tags||[]).length > 0
+        ? `<div style="margin-bottom:0.5rem;">${n.tags.map(t=>`<span style="display:inline-block; background:var(--brand); color:white; padding:0.2rem 0.55rem; border-radius:999px; font-size:0.7rem; margin-right:0.2rem;">${t}</span>`).join('')}</div>`
+        : '';
+      li.innerHTML = `<strong style="font-size:0.95rem; color:var(--text);">${n.subject} / ${n.topic}</strong><br>${tagsHtml}<div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.5rem;"><button class="btn" onclick="editNote('${n.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Edit</button><button class="btn btn-secondary" onclick="exportPDF('${n.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">PDF</button><button class="btn" onclick="openShareModal('${n.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Share</button><button class="btn btn-muted" onclick="deleteNote('${n.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Delete</button></div>`;
+      list.appendChild(li);
+    });
+  }
 
+  updateNotePagination(r.data);
+}
+
+// Builds the previous/next controls for note pagination.
+function updateNotePagination(pageData){
+  const pagination = document.getElementById('note-pagination');
+  if(!pageData || pageData.pages <= 1){ pagination.innerHTML=''; return; }
+  pagination.innerHTML = `<button class="btn" ${pageData.page <= 1 ? 'disabled' : ''} onclick="changeNotePage(-1)" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Prev</button><span style="font-size:0.85rem; color:var(--text-soft);">Page ${pageData.page}/${pageData.pages}</span><button class="btn" ${pageData.page >= pageData.pages ? 'disabled' : ''} onclick="changeNotePage(1)" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Next</button>`;
+}
+
+// Changes the current note page and reloads notes with the active filter.
 window.changeNotePage = (delta) => { notePage = Math.max(1, notePage + delta); loadNotes(document.getElementById('filter-input').value); };
 
+// Loads notes shared by other users and shows them in a read-only list.
 async function loadSharedNotes() {
   const res = await apiFetch('/notes/shared');
   const list = document.getElementById('shared-note-list');
+  const countEl = document.getElementById('shared-count');
   if (!res.success || !res.data || res.data.length === 0) {
     list.innerHTML = '<li><em>No notes shared with you yet</em></li>';
+    countEl.textContent = '(0)';
     return;
   }
+  countEl.textContent = `(${res.data.length})`;
   list.innerHTML = '';
   res.data.forEach(n => {
     const li = document.createElement('li');
     li.className = 'card';
     li.style.listStyle = 'none';
+    li.style.marginBottom = '0.5rem';
+    li.style.padding = '0.75rem';
     const owner = n.user_id ? n.user_id.substring(0, 8) + '...' : 'Unknown';
     li.innerHTML = `
-      <strong>${n.subject} / ${n.topic}</strong>
-      <small style="color:#999;">Shared by: ${owner}</small><br>
-      ${n.content ? n.content : '<em>No content</em>'}<br>
-      <button class="btn" onclick="viewNote('${n.id}')">View</button>
-      <button class="btn" onclick="exportPDF('${n.id}')">Export PDF</button>
+      <strong style="font-size:0.95rem; color:var(--text);">${n.subject} / ${n.topic}</strong>
+      <small style="display:block; margin-bottom:0.5rem;">Shared by: ${owner}</small>
+      <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+        <button class="btn" onclick="viewNote('${n.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">View</button>
+        <button class="btn btn-secondary" onclick="exportPDF('${n.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">PDF</button>
+      </div>
     `;
     list.appendChild(li);
   });
 }
 
+// Opens the share dialog and lists users who already have access.
 window.openShareModal = async(noteId) => {
   document.getElementById('share-email').value = '';
   document.getElementById('share-msg').textContent = '';
   document.getElementById('share-modal').style.display = 'flex';
   document.getElementById('share-modal').noteId = noteId;
-  
-  // Load current shares
+
   const res = await apiFetch(`/notes/${noteId}/shares`);
   const shareList = document.getElementById('share-list');
   if (res.success && res.data.length > 0) {
     shareList.innerHTML = res.data.map(u => `
-      <li style="padding:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+      <li style="padding:0.5rem; display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
         <span>${u.name} (${u.email})</span>
-        <button class="btn" onclick="unshareNote('${noteId}', '${u.id}')" style="padding:0.3rem 0.6rem; font-size:0.8rem;">Remove</button>
+        <button class="btn btn-muted" onclick="unshareNote('${noteId}', '${u.id}')" style="padding:0.3rem 0.6rem; font-size:0.8rem;">Remove</button>
       </li>
     `).join('');
   } else {
@@ -131,23 +208,26 @@ window.openShareModal = async(noteId) => {
   }
 };
 
+// Closes the share dialog without making changes.
 window.closeShareModal = () => {
   document.getElementById('share-modal').style.display = 'none';
 };
 
+// Shares the selected note with another user by email.
 window.shareNote = async(noteId, email) => {
   const res = await apiFetch(`/notes/${noteId}/share`, 'POST', { email });
   if (res.success) {
-    document.getElementById('share-msg').style.color = 'green';
+    document.getElementById('share-msg').style.color = 'var(--success)';
     document.getElementById('share-msg').textContent = 'Note shared successfully!';
     document.getElementById('share-email').value = '';
     setTimeout(() => openShareModal(noteId), 1000);
   } else {
-    document.getElementById('share-msg').style.color = 'red';
+    document.getElementById('share-msg').style.color = 'var(--danger)';
     document.getElementById('share-msg').textContent = res.message;
   }
 };
 
+// Removes a user's access to a shared note.
 window.unshareNote = async(noteId, userId) => {
   const res = await apiFetch(`/notes/${noteId}/share/${userId}`, 'DELETE');
   if (res.success) {
@@ -157,6 +237,7 @@ window.unshareNote = async(noteId, userId) => {
   }
 };
 
+// Wires up page actions after the DOM is ready and fetches initial files.
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('confirm-share').onclick = () => {
     const email = document.getElementById('share-email').value.trim();
@@ -194,36 +275,40 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFiles();
 });
 
+// Loads uploaded files and renders file actions like download and delete.
 async function loadFiles() {
   const res = await apiFetch('/files');
   const list = document.getElementById('file-list');
+  const countEl = document.getElementById('file-count');
   if (!res.success || !Array.isArray(res.data) || res.data.length === 0) {
-    list.innerHTML = '<li><em>No uploaded files yet.</em></li>';
+    list.innerHTML = '<li><em>No files uploaded yet.</em></li>';
+    countEl.textContent = '(0)';
     return;
   }
 
+  countEl.textContent = `(${res.data.length})`;
   list.innerHTML = '';
   res.data.forEach(file => {
     const li = document.createElement('li');
     li.className = 'card';
     li.style.listStyle = 'none';
-    li.style.marginBottom = '0.75rem';
+    li.style.marginBottom = '0.5rem';
+    li.style.padding = '0.75rem';
     const sizeKb = (file.size / 1024).toFixed(1);
     li.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; flex-wrap:wrap;">
-        <div>
-          <strong>${file.filename}</strong><br>
-          <small>${sizeKb} KB • ${file.type.toUpperCase()}</small>
-        </div>
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-          <button class="btn" onclick="downloadFile('${file.id}')">Download</button>
-          <button class="btn" onclick="deleteFile('${file.id}')">Delete</button>
+      <div>
+        <strong style="font-size:0.95rem; color:var(--text);">${file.filename}</strong><br>
+        <small>${sizeKb} KB • ${file.type.toUpperCase()}</small>
+        <div style="display:flex; gap:0.3rem; margin-top:0.5rem; flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="downloadFile('${file.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Download</button>
+          <button class="btn btn-muted" onclick="deleteFile('${file.id}')" style="padding:0.4rem 0.6rem; font-size:0.8rem;">Delete</button>
         </div>
       </div>`;
     list.appendChild(li);
   });
 }
 
+// Deletes a file after the user confirms the action.
 window.deleteFile = async (fileId) => {
   if (!confirm('Delete this file?')) return;
   const res = await apiFetch(`/files/${fileId}`, 'DELETE');
@@ -231,6 +316,7 @@ window.deleteFile = async (fileId) => {
   loadFiles();
 };
 
+// Downloads a file from the server using the authenticated user session.
 window.downloadFile = async (fileId) => {
   const token = getToken();
   const res = await fetch(`${API_URL}/files/${fileId}/download`, {
@@ -257,21 +343,87 @@ loadSharedNotes();
 
 document.getElementById('filter-input').oninput = (e)=> { notePage = 1; loadNotes(e.target.value); };
 
+// Saves a text-based note with subject, topic, content, and tags.
 document.getElementById('save-note').onclick = async ()=>{
-  const sub=document.getElementById('note-subject').value.trim(); const top=document.getElementById('note-topic').value.trim(); const content=document.getElementById('note-content').value;
+  const sub = document.getElementById('note-subject').value.trim();
+  const top = document.getElementById('note-topic').value.trim();
+  const content = document.getElementById('note-content').value;
   const tagsInput = document.getElementById('note-tags').value.trim();
   const tags = tagsInput ? tagsInput.split(',').map(t=>t.trim()).filter(t=>t) : [];
   if(!sub || !top) { alert('Subject and topic are required'); return; }
-  const res=await apiFetch('/notes','POST',{subject:sub,topic:top,content,tags}); if(!res.success){alert(res.message);return;} document.getElementById('note-subject').value=''; document.getElementById('note-topic').value=''; document.getElementById('note-content').value=''; document.getElementById('note-tags').value=''; notePage = 1; loadNotes(); const msgEl = document.createElement('div'); msgEl.style.cssText = 'padding:0.8rem;border-radius:6px;margin-bottom:1rem;background:#e8f5e9;color:#2e7d32;border:1px solid #c8e6c9;'; msgEl.textContent = 'Note saved successfully'; document.querySelector('.card').appendChild(msgEl); setTimeout(()=>msgEl.remove(), 3000); };
+  const res = await apiFetch('/notes','POST',{subject:sub,topic:top,content,tags});
+  if(!res.success){ alert(res.message); return; }
+  document.getElementById('note-subject').value = '';
+  document.getElementById('note-topic').value = '';
+  document.getElementById('note-content').value = '';
+  document.getElementById('note-tags').value = '';
+  notePage = 1;
+  loadNotes();
+  const msgEl = document.createElement('div');
+  msgEl.style.cssText = 'padding:0.8rem;border-radius:16px;margin-bottom:1rem;background:rgba(47,133,90,0.12);color:var(--success);border:1px solid rgba(47,133,90,0.2);';
+  msgEl.textContent = 'Note saved successfully';
+  document.querySelector('.card').appendChild(msgEl);
+  setTimeout(()=>msgEl.remove(), 3000);
+};
 
-document.getElementById('save-drawing').onclick=async()=>{ const sub=document.getElementById('note-subject').value.trim(); const top=document.getElementById('note-topic').value.trim(); if(!sub||!top){alert('Add subject and topic first');return;} const drawing = document.getElementById('canvas').toDataURL(); const res=await apiFetch('/notes','POST',{subject:sub,topic:top,content:'[Canvas Drawing]',drawing}); if(!res.success){alert(res.message);return;} document.getElementById('note-subject').value=''; document.getElementById('note-topic').value=''; ctx.clearRect(0,0,760,320); notePage = 1; loadNotes(); showMsg(document.getElementById('drawing-msg'), 'Drawing saved'); };
+// Saves the current canvas drawing as a note linked to the subject and topic fields.
+document.getElementById('save-drawing').onclick = async()=>{
+  const sub = document.getElementById('note-subject').value.trim();
+  const top = document.getElementById('note-topic').value.trim();
+  if(!sub || !top){ alert('Add subject and topic first'); return; }
+  const drawing = document.getElementById('canvas').toDataURL();
+  const res = await apiFetch('/notes','POST',{subject:sub,topic:top,content:'[Canvas Drawing]',drawing});
+  if(!res.success){ alert(res.message); return; }
+  document.getElementById('note-subject').value = '';
+  document.getElementById('note-topic').value = '';
+  ctx.clearRect(0,0,760,320);
+  notePage = 1;
+  loadNotes();
+  showMsg(document.getElementById('drawing-msg'), 'Drawing saved');
+};
 
-window.editNote = async(id)=>{ const r=await apiFetch(`/notes/${id}`); if(!r.success){alert(r.message);return;} if(r.data.is_owner === false) { alert('Cannot edit notes shared with you'); return; } const note=r.data; document.getElementById('note-subject').value=note.subject; document.getElementById('note-topic').value=note.topic; document.getElementById('note-content').value=note.content||''; if(note.drawing){ const img = new Image(); img.onload=()=>ctx.drawImage(img,0,0,760,320); img.src=note.drawing; } document.getElementById('save-note').onclick=async()=>{ const sub=document.getElementById('note-subject').value.trim(); const top=document.getElementById('note-topic').value.trim(); const content=document.getElementById('note-content').value; const resp=await apiFetch(`/notes/${id}`,'PUT',{subject:sub,topic:top,content}); if(!resp.success){alert(resp.message);return;} alert('Note updated'); loadNotes(); }};
+// Loads a note into the form so the owner can update it.
+window.editNote = async(id)=>{
+  const r = await apiFetch(`/notes/${id}`);
+  if(!r.success){ alert(r.message); return; }
+  if(r.data.is_owner === false) { alert('Cannot edit notes shared with you'); return; }
+  const note = r.data;
+  document.getElementById('note-subject').value = note.subject;
+  document.getElementById('note-topic').value = note.topic;
+  document.getElementById('note-content').value = note.content || '';
+  if(note.drawing){
+    const img = new Image();
+    img.onload = ()=>ctx.drawImage(img,0,0,760,320);
+    img.src = note.drawing;
+  }
+  document.getElementById('save-note').onclick = async()=>{
+    const sub = document.getElementById('note-subject').value.trim();
+    const top = document.getElementById('note-topic').value.trim();
+    const content = document.getElementById('note-content').value;
+    const resp = await apiFetch(`/notes/${id}`,'PUT',{subject:sub,topic:top,content});
+    if(!resp.success){ alert(resp.message); return; }
+    alert('Note updated');
+    loadNotes();
+  };
+};
 
-window.viewNote = async(id)=>{ const r=await apiFetch(`/notes/${id}`); if(!r.success){alert(r.message);return;} const note=r.data; alert(`Subject: ${note.subject}\nTopic: ${note.topic}\n\nContent:\n${note.content || 'No content'}`); };
+// Shows a quick read-only preview of a note in a dialog.
+window.viewNote = async(id)=>{
+  const r = await apiFetch(`/notes/${id}`);
+  if(!r.success){ alert(r.message); return; }
+  const note = r.data;
+  alert(`Subject: ${note.subject}\nTopic: ${note.topic}\n\nContent:\n${note.content || 'No content'}`);
+};
 
-window.deleteNote = async(id)=>{ if(!confirm('Delete note?')) return; const r=await apiFetch(`/notes/${id}`,'DELETE'); if(!r.success){alert(r.message);return;} loadNotes(); };
+// Deletes a note after the user confirms the action.
+window.deleteNote = async(id)=>{
+  if(!confirm('Delete note?')) return;
+  const r = await apiFetch(`/notes/${id}`,'DELETE');
+  if(!r.success){ alert(r.message); return; }
+  loadNotes();
+};
 
+// Exports a note to PDF for offline viewing or sharing.
 window.exportPDF = async(id) => {
   const r = await apiFetch(`/notes/${id}`);
   if(!r.success) { alert(r.message); return; }
@@ -283,7 +435,7 @@ window.exportPDF = async(id) => {
     ${note.tags && note.tags.length > 0 ? `<p><strong>Tags:</strong> ${note.tags.join(', ')}</p>` : ''}
     <p><strong>Created:</strong> ${new Date(note.created_at).toLocaleDateString()}</p>
     <hr>
-    <p>${note.content.replace(/\n/g, '<br>')}</p>
+    <p>${(note.content || '').replace(/\n/g, '<br>')}</p>
   `;
   const opt = {
     margin: 10,

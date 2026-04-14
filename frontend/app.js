@@ -70,59 +70,8 @@ function setData(name, data){ localStorage.setItem(name, JSON.stringify(data)); 
 function getData(name){ const v = localStorage.getItem(name); return v ? JSON.parse(v) : null; }
 
 function applyDarkMode(isDark) {
-  if(isDark) {
-    document.body.style.background = '#2E2639';
-    document.body.style.color = '#E8DFF5';
-    document.querySelectorAll('.card').forEach(el => {
-      el.style.background = '#3D3447';
-      el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
-    });
-    document.querySelectorAll('.input-field, textarea').forEach(el => {
-      el.style.background = '#4A4254';
-      el.style.color = '#E8DFF5';
-      el.style.borderColor = '#5A536B';
-    });
-    document.querySelectorAll('.btn').forEach(el => {
-      el.style.background = 'linear-gradient(135deg, #B89FD4 0%, #A8899B 100%)';
-      el.style.color = '#fff';
-    });
-    document.querySelectorAll('label').forEach(el => {
-      el.style.color = '#E8DFF5';
-    });
-    document.querySelectorAll('.navbar').forEach(el => {
-      el.style.background = 'rgba(61, 52, 71, 0.95)';
-      el.style.color = '#E8DFF5';
-    });
-    document.querySelectorAll('.navbar a').forEach(el => {
-      el.style.color = '#E8DFF5';
-    });
-  } else {
-    document.body.style.background = 'linear-gradient(135deg, #E8DFF5 0%, #F3E8FF 100%)';
-    document.body.style.color = '#5C4B63';
-    document.querySelectorAll('.card').forEach(el => {
-      el.style.background = '#fff';
-      el.style.boxShadow = '0 4px 20px rgba(201,174,231,0.15)';
-    });
-    document.querySelectorAll('.input-field, textarea').forEach(el => {
-      el.style.background = '#fff';
-      el.style.color = '#5C4B63';
-      el.style.borderColor = '#E8DFF5';
-    });
-    document.querySelectorAll('.btn').forEach(el => {
-      el.style.background = '';
-      el.style.color = '';
-    });
-    document.querySelectorAll('label').forEach(el => {
-      el.style.color = '#5C4B63';
-    });
-    document.querySelectorAll('.navbar').forEach(el => {
-      el.style.background = '';
-      el.style.color = '';
-    });
-    document.querySelectorAll('.navbar a').forEach(el => {
-      el.style.color = '';
-    });
-  }
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+  document.body.classList.toggle('dark-mode', !!isDark);
 }
 
 function initDarkMode() {
