@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AI Assistant | AI Study Assistant</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="profile.html">Profile</a><a href="notebook.html">Notebook</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
+<div class="container">
+<section class="page-hero">
+  <p class="hero-kicker">AI Workspace</p>
+  <h1>Study with context, not blank prompts.</h1>
+  <p class="hero-subtitle">Attach your notes or uploaded files, then ask questions, generate summaries, or create quizzes from material you already saved.</p>
+</section>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Use Uploaded File</h3>
+    <p class="section-intro">Pick a file from Notebook to give the AI extra study context.</p>
+    <select id="file-select" class="input-field">
+      <option value="">-- No file selected --</option>
+    </select>
+    <button class="btn" id="refresh-files">Refresh Files</button>
+    <p id="file-status" style="font-size:0.9rem; margin-top:0.5rem; color:var(--text-faint);"></p>
+  </div>
+
+  <div class="card">
+    <h3>Use Saved Note</h3>
+    <p class="section-intro">Select a notebook entry to reuse its subject, topic, tags, and content as context.</p>
+    <select id="note-select" class="input-field">
+      <option value="">-- No note selected --</option>
+    </select>
+    <button class="btn" id="refresh-notes">Refresh Notes</button>
+    <p id="note-status" style="font-size:0.9rem; margin-top:0.5rem; color:var(--text-faint);"></p>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Ask Question</h3>
+  <p class="section-intro">Ask a question about your study material. Selected note and file context will be included if available.</p>
+  <textarea id="question" class="input-field" rows="3" placeholder="Ask a question about your topic..."></textarea>
+  <button class="btn" id="ask-btn">Get Answer</button>
+  <p id="answer" class="result-panel"></p>
+</div>
+
+<div class="card">
+  <h3>Summarize Notes</h3>
+  <p class="section-intro">Summarize pasted notes or generate a summary from the file or note you selected above.</p>
+  <textarea id="summary-text" class="input-field" rows="3" placeholder="Paste your notes..."></textarea>
+  <button class="btn" id="summarize-btn">Summarize</button>
+  <button class="btn btn-secondary" id="summarize-file-btn">Summarize Selected File</button>
+  <button class="btn btn-secondary" id="summarize-note-btn">Summarize Selected Note</button>
+  <p id="summary" class="result-panel"></p>
+</div>
+
+<div class="card">
+  <h3>Generate Quiz</h3>
+  <p class="section-intro">Turn a topic into quick revision questions and answers.</p>
+  <input id="quiz-topic" class="input-field" placeholder="Enter topic" />
+  <button class="btn" id="quiz-btn">Generate Quiz</button>
+  <pre id="quiz"></pre>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+requireAuth();
+initDarkMode();
+document.getElementById('logout').onclick = () => {clearToken(); localStorage.removeItem('user'); window.location='index.html';};
+
+async function display(eid, endpoint, payload, btn){
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+  }
+  const out = document.getElementById(eid);
+  out.textContent = '';
+  const res = await apiFetch(endpoint, 'POST', payload);
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = endpoint === '/ai/chat' ? 'Get Answer' : endpoint === '/ai/summarize' ? 'Summarize' : 'Generate Quiz';
+  }
+  if(!res.success){ out.innerHTML = `<span style="color:var(--danger)">${res.message}</span>`; return; }
+  const data = res.data.answer || res.data.summary || res.data.quiz;
+  out.style.whiteSpace = 'pre-wrap';
+  out.style.marginTop = '0.75rem';
+  out.textContent = data;
+}
+
+async function loadFileOptions() {
+  const select = document.getElementById('file-select');
+  const status = document.getElementById('file-status');
+  const res = await apiFetch('/files');
+  select.innerHTML = '<option value="">-- No file selected --</option>';
+  if (!res.success || !Array.isArray(res.data) || res.data.length === 0) {
+    status.textContent = 'No uploaded files found. Upload files from Notebook.';
+    return;
+  }
+  res.data.forEach(file => {
+    const option = document.createElement('option');
+    option.value = file.id;
+    option.textContent = `${file.filename} (${(file.size/1024).toFixed(1)} KB)`;
+    select.appendChild(option);
+  });
+  status.textContent = `${res.data.length} uploaded file(s) available.`;
+}
+
+async function loadNoteOptions() {
+  const select = document.getElementById('note-select');
+  const status = document.getElementById('note-status');
+  const res = await apiFetch('/notes?limit=50');
+  select.innerHTML = '<option value="">-- No note selected --</option>';
+  const items = Array.isArray(res?.data?.items) ? res.data.items : [];
+  if (!res.success || items.length === 0) {
+    status.textContent = 'No notes found. Create notes from Notebook.';
+    return;
+  }
+  items.forEach(note => {
+    const option = document.createElement('option');
+    option.value = note.id;
+    option.textContent = `${note.subject || 'Untitled'} - ${note.topic || 'No topic'}`;
+    select.appendChild(option);
+  });
+  status.textContent = `${items.length} note(s) available.`;
+}
+
+function getSelectedFileId() {
+  return document.getElementById('file-select').value || null;
+}
+
+function getSelectedNoteId() {
+  return document.getElementById('note-select').value || null;
+}
+
+document.getElementById('ask-btn').onclick = async function() {
+  const question = document.getElementById('question').value.trim();
+  if(!question){ alert('Please ask a question'); return; }
+  const fileId = getSelectedFileId();
+  const noteId = getSelectedNoteId();
+  const payload = { message: question };
+  if (fileId) payload.file_id = fileId;
+  if (noteId) payload.note_id = noteId;
+  display('answer','/ai/chat', payload, this);
+};
+
+document.getElementById('summarize-btn').onclick = async function() {
+  const text = document.getElementById('summary-text').value.trim();
+  if(!text){ alert('Please enter text to summarize or select a file to summarize'); return; }
+  display('summary','/ai/summarize',{text}, this);
+};
+
+document.getElementById('summarize-file-btn').onclick = async function() {
+  const fileId = getSelectedFileId();
+  if(!fileId){ alert('Please select a file to summarize'); return; }
+  display('summary','/ai/summarize',{file_id: fileId}, this);
+};
+
+document.getElementById('summarize-note-btn').onclick = async function() {
+  const noteId = getSelectedNoteId();
+  if(!noteId){ alert('Please select a note to summarize'); return; }
+  display('summary','/ai/summarize',{note_id: noteId}, this);
+};
+
+document.getElementById('quiz-btn').onclick = async function() {
+  const topic = document.getElementById('quiz-topic').value.trim();
+  if(!topic){ alert('Please enter a topic'); return; }
+  display('quiz','/ai/quiz',{topic}, this);
+};
+
+document.getElementById('refresh-files').onclick = loadFileOptions;
+document.getElementById('refresh-notes').onclick = loadNoteOptions;
+
+loadFileOptions();
+loadNoteOptions();
+</script>
+</body>
+</html>

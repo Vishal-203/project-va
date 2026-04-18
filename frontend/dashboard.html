@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Dashboard | AI Study Assistant</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="navbar"><div>AI Study Assistant</div><div><a href="profile.html">Profile</a><a href="notebook.html">Notebook</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
+<div class="container">
+<section class="page-hero">
+  <p class="hero-kicker">Study Dashboard</p>
+  <h1>Welcome back.</h1>
+  <p class="hero-subtitle">Check your momentum, open your latest notes, and jump straight into the next thing you want to study.</p>
+</section>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Profile</h3>
+    <p class="section-intro">Your account details and a shortcut to settings.</p>
+    <p id="user-name" style="font-size:1.25rem; color:var(--brand-strong); font-weight:700;"></p>
+    <p id="user-email" style="color:var(--text-faint);"></p>
+    <a href="profile.html" class="btn">View Profile</a>
+  </div>
+
+  <div class="card">
+    <h3>Quick Stats</h3>
+    <p class="section-intro">A live snapshot of your notes and planner activity.</p>
+    <div id="quick-stats">
+      <p>Loading stats...</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Quick Actions</h3>
+  <p class="section-intro">Move into the part of the workspace you need right now.</p>
+  <div class="action-grid">
+    <button class="btn" onclick="window.location='notebook.html'">Create Note</button>
+    <button class="btn" onclick="window.location='planner.html'">Add Task</button>
+    <button class="btn" onclick="window.location='ai_assistant.html'">Ask AI</button>
+    <button class="btn" onclick="window.location='profile.html'">Settings</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Recent Notes</h3>
+  <p class="section-intro">Your latest notebook entries, ready to reopen.</p>
+  <div id="recent-notes-container">
+    <p>Loading your notes...</p>
+  </div>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+requireAuth();
+initDarkMode();
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+if(user.name){
+  document.getElementById('user-name').textContent = user.name;
+  document.getElementById('user-email').textContent = user.email;
+}
+
+async function loadStats() {
+  const res = await apiFetch('/user/stats');
+  if(res.success) {
+    const s = res.data;
+    document.getElementById('quick-stats').innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-tile"><span class="stat-label">Notes</span><span class="stat-value">${s.notes}</span></div>
+        <div class="stat-tile"><span class="stat-label">Total Tasks</span><span class="stat-value">${s.total_tasks}</span></div>
+        <div class="stat-tile"><span class="stat-label">Completed</span><span class="stat-value">${s.completed_tasks}</span></div>
+        <div class="stat-tile"><span class="stat-label">Pending</span><span class="stat-value">${s.pending_tasks}</span></div>
+      </div>
+    `;
+  }
+}
+
+async function loadRecentNotes() {
+  const res = await apiFetch('/notes');
+  const container = document.getElementById('recent-notes-container');
+  const items = Array.isArray(res?.data?.items) ? res.data.items : Array.isArray(res?.data) ? res.data : [];
+
+  if(res.success && items.length > 0) {
+    container.innerHTML = '<ul>';
+    items.slice(0, 5).forEach(n => {
+      const date = new Date(n.updated_at).toLocaleDateString();
+      container.innerHTML += `
+        <li style="padding:0.9rem 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+          <div>
+            <strong style="color:var(--text);">${n.subject}</strong><br>
+            <small>${n.topic} • ${date}</small>
+          </div>
+          <span style="color:var(--brand); font-weight:700;">Open</span>
+        </li>
+      `;
+    });
+    container.innerHTML += '</ul>';
+  } else if(res.success) {
+    container.innerHTML = '<p class="empty-state">No notes yet. <a href="notebook.html">Create your first note</a>.</p>';
+  }
+}
+
+document.getElementById('logout').onclick = () => {
+  clearToken();
+  localStorage.removeItem('user');
+  window.location = 'index.html';
+};
+
+loadStats();
+loadRecentNotes();
+</script>
+</body>
+</html>

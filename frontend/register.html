@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Study Assistant - Register</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-page">
+<div class="navbar"><div>AI Study Assistant</div><div><a href="index.html">Login</a></div></div>
+<div class="container">
+<div class="auth-shell">
+  <section class="auth-hero">
+    <div>
+      <p class="auth-kicker">Build Your Routine</p>
+      <h1>Create a study space that feels organized.</h1>
+      <p>Start with notes and planning, then layer AI summaries and quizzes on top of your own materials.</p>
+    </div>
+    <div class="auth-points">
+      <span>Track tasks and deadlines</span>
+      <span>Save notes, tags, and drawings</span>
+      <span>Ask AI using your saved context</span>
+    </div>
+  </section>
+  <section class="auth-card">
+    <h2>Register</h2>
+    <p class="section-intro">Create your account to start organizing your study workflow.</p>
+    <p id="register-msg" style="color:red"></p>
+    <input id="name" class="input-field" placeholder="Full Name" />
+    <input id="email" class="input-field" placeholder="Email" type="email" />
+    <input id="password" class="input-field" placeholder="Password" type="password" />
+    <button class="btn" id="register-btn">Register</button>
+  </section>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+const registerBtn = document.getElementById('register-btn');
+registerBtn.onclick = async () => {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  const result = await apiFetch('/auth/register', 'POST', {name, email, password});
+  if(!result.success){ showMsg(document.getElementById('register-msg'), result.message); return; }
+  window.location.href = 'index.html';
+};
+</script>
+</body>
+</html>
