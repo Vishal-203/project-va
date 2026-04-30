@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>AI Assistant | NeuroNote</title>
+<title>AI Assistant | AI Study Assistant</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="navbar"><div>NeuroNote</div><div><a href="dashboard.html">Dashboard</a><a href="notebook.html">Notes</a><a href="ai_assistant.html">AI Assistant</a><a href="ai_assistant.html">Smart Tools</a><a href="planner.html">Tasks</a><a href="planner.html">Calendar</a><a href="profile.html">Profile</a><a href="profile.html">Settings</a><a href="#" id="logout">Logout</a></div></div>
+<div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="profile.html">Profile</a><a href="notebook.html">Notebook</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
 <div class="container">
 <section class="page-hero">
-  <p class="hero-kicker">AI Assistant</p>
-  <h1>Study with a live neural context stream.</h1>
-  <p class="hero-subtitle">Attach notes or uploaded files, then chat, summarize, and generate quizzes inside a glowing assistant workspace.</p>
+  <p class="hero-kicker">AI Workspace</p>
+  <h1>Study with context, not blank prompts.</h1>
+  <p class="hero-subtitle">Attach your notes or uploaded files, then ask questions, generate summaries, or create quizzes from material you already saved.</p>
 </section>
 
 <div class="grid-2">
   <div class="card">
     <h3>Use Uploaded File</h3>
-    <p class="section-intro">Pick a file from Notes to give the AI extra study context.</p>
+    <p class="section-intro">Pick a file from Notebook to give the AI extra study context.</p>
     <select id="file-select" class="input-field">
       <option value="">-- No file selected --</option>
     </select>
@@ -36,7 +36,7 @@
   </div>
 </div>
 
-<div class="card chat-card">
+<div class="card">
   <h3>Ask Question</h3>
   <p class="section-intro">Ask a question about your study material. Selected note and file context will be included if available.</p>
   <textarea id="question" class="input-field" rows="3" placeholder="Ask a question about your topic..."></textarea>
@@ -93,7 +93,7 @@ async function loadFileOptions() {
   const res = await apiFetch('/files');
   select.innerHTML = '<option value="">-- No file selected --</option>';
   if (!res.success || !Array.isArray(res.data) || res.data.length === 0) {
-    status.textContent = 'No uploaded files found. Upload files from Notes.';
+    status.textContent = 'No uploaded files found. Upload files from Notebook.';
     return;
   }
   res.data.forEach(file => {
@@ -112,7 +112,7 @@ async function loadNoteOptions() {
   select.innerHTML = '<option value="">-- No note selected --</option>';
   const items = Array.isArray(res?.data?.items) ? res.data.items : [];
   if (!res.success || items.length === 0) {
-    status.textContent = 'No notes found. Create notes from Notes.';
+    status.textContent = 'No notes found. Create notes from Notebook.';
     return;
   }
   items.forEach(note => {

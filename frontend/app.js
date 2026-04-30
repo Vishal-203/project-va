@@ -58,9 +58,9 @@ function showMsg(el, msg, duration=4000){
   el.style.padding = '0.8rem';
   el.style.borderRadius = '6px';
   el.style.marginBottom = '1rem';
-  el.style.backgroundColor = 'rgba(0, 229, 255, 0.08)';
-  el.style.color = 'var(--brand)';
-  el.style.border = '1px solid rgba(0, 229, 255, 0.24)';
+  el.style.backgroundColor = '#e8f5e9';
+  el.style.color = '#2e7d32';
+  el.style.border = '1px solid #c8e6c9';
   setTimeout(()=>{ el.textContent=''; el.style.display='none'; }, duration); 
 }
 
@@ -86,45 +86,3 @@ function initDarkMode() {
     };
   }
 }
-
-function initNeuralFlow() {
-  document.body.classList.toggle('focus-mode', localStorage.getItem('focusMode') === 'true');
-
-  if (!document.querySelector('.neural-bg')) {
-    const neuralBg = document.createElement('div');
-    neuralBg.className = 'neural-bg';
-    neuralBg.setAttribute('aria-hidden', 'true');
-
-    for (let i = 0; i < 5; i += 1) {
-      neuralBg.appendChild(document.createElement('span')).className = 'neural-bg__line';
-    }
-    for (let i = 0; i < 7; i += 1) {
-      neuralBg.appendChild(document.createElement('span')).className = 'neural-bg__node';
-    }
-
-    document.body.prepend(neuralBg);
-  }
-
-  const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  let markedActiveLink = false;
-  document.querySelectorAll('.navbar a[href]').forEach((link) => {
-    const href = (link.getAttribute('href') || '').split('#')[0].toLowerCase();
-    if (!markedActiveLink && href && href === currentPage) {
-      link.classList.add('active');
-      markedActiveLink = true;
-    }
-  });
-
-  const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  document.body.classList.toggle('reduce-motion', shouldReduceMotion);
-
-  window.addEventListener('mousemove', (event) => {
-    if (shouldReduceMotion || document.body.classList.contains('focus-mode')) return;
-    const x = ((event.clientX / window.innerWidth) - 0.5) * 12;
-    const y = ((event.clientY / window.innerHeight) - 0.5) * 12;
-    document.documentElement.style.setProperty('--parallax-x', `${x}px`);
-    document.documentElement.style.setProperty('--parallax-y', `${y}px`);
-  }, { passive: true });
-}
-
-document.addEventListener('DOMContentLoaded', initNeuralFlow);
