@@ -9,4 +9,3 @@ pypdf
 python-docx
 pillow
 pytesseract
-gunicorn
