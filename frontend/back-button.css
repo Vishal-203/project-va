@@ -1,0 +1,37 @@
+.back-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 999;
+  background: linear-gradient(135deg, var(--brand-strong), var(--brand));
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  backdrop-filter: blur(10px);
+}
+
+.back-btn:hover {
+  transform: scale(1.1) rotate(-180deg);
+  box-shadow: 0 12px 32px rgba(93, 117, 72, 0.4);
+}
+
+@media (max-width: 768px) {
+  .back-btn {
+    top: 15px;
+    left: 15px;
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+}

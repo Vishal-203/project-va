@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Profile | AI Study Assistant</title>
+<title>Profile | NeuroNote</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="navbar"><div>AI Study Assistant</div><div><a href="dashboard.html">Dashboard</a><a href="notebook.html">Notebook</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
+<div class="navbar"><div>NeuroNote</div><div><a href="dashboard.html">Dashboard</a><a href="notebook.html">Notes</a><a href="ai_assistant.html">AI Assistant</a><a href="ai_assistant.html">Smart Tools</a><a href="planner.html">Tasks</a><a href="planner.html">Calendar</a><a href="profile.html">Profile</a><a href="profile.html">Settings</a><a href="#" id="logout">Logout</a></div></div>
 <div class="container">
 <section class="page-hero">
-  <p class="hero-kicker">Account Settings</p>
+  <p class="hero-kicker">Profile + Settings</p>
   <h1>User profile</h1>
-  <p class="hero-subtitle">Manage your personal details, review your study activity, and switch between light and dark themes.</p>
+  <p class="hero-subtitle">Manage your account details, review your activity, and tune the workspace for focused study.</p>
 </section>
 
 <div class="grid-2">
@@ -52,10 +52,14 @@
 
 <div class="card">
   <h3>Theme</h3>
-  <p class="section-intro">Switch the interface mood to match your environment.</p>
+  <p class="section-intro">Neural Flow stays dark for contrast. Use focus mode to reduce background motion.</p>
   <label style="display:flex; align-items:center; gap:0.65rem; cursor:pointer;">
     <input type="checkbox" id="dark-mode-toggle" />
-    <span>Enable Dark Mode</span>
+    <span>Keep Neural Flow active</span>
+  </label>
+  <label style="display:flex; align-items:center; gap:0.65rem; cursor:pointer; margin-top:0.75rem;">
+    <input type="checkbox" id="focus-mode-toggle" />
+    <span>Focus Mode</span>
   </label>
 </div>
 </div>
@@ -120,6 +124,14 @@ document.getElementById('change-password-btn').onclick = async () => {
 };
 
 initDarkMode();
+const focusToggle = document.getElementById('focus-mode-toggle');
+const savedFocusMode = localStorage.getItem('focusMode') === 'true';
+document.body.classList.toggle('focus-mode', savedFocusMode);
+focusToggle.checked = savedFocusMode;
+focusToggle.onchange = () => {
+  localStorage.setItem('focusMode', focusToggle.checked);
+  document.body.classList.toggle('focus-mode', focusToggle.checked);
+};
 
 document.getElementById('logout').onclick = () => { clearToken(); localStorage.removeItem('user'); window.location='index.html'; };
 
