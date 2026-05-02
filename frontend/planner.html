@@ -2,11 +2,35 @@
 <html lang='en'>
 <head>
 <meta charset='utf-8'>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Study Planner | AI Study Assistant</title>
 <link rel='stylesheet' href='styles.css'>
 </head>
 <body>
-<div class='navbar'><div>AI Study Assistant</div><div><a href='dashboard.html'>Dashboard</a><a href='profile.html'>Profile</a><a href='notebook.html'>Notebook</a><a href='ai_assistant.html'>AI Assistant</a><a href='#' id='logout'>Logout</a></div></div>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span>AI Study Assistant</span>
+    <button class="sidebar-close" id="sidebar-close">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" data-page="dashboard">📊 Dashboard</a>
+    <a href="notebook.html" data-page="notebook">📓 Notebook</a>
+    <a href="ai_assistant.html" data-page="ai_assistant">🤖 AI Assistant</a>
+    <a href="planner.html" class="active" data-page="planner">📅 Planner</a>
+    <a href="profile.html" data-page="profile">👤 Profile</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="#" id="logout">🚪 Logout</a>
+  </div>
+</div>
+
+<!-- Sidebar Overlay (for mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar Toggle (for mobile) -->
+<button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+
 <div class='container'>
 <section class='page-hero'>
   <p class='hero-kicker'>Study Planner</p>
@@ -40,6 +64,7 @@
 <script>
 requireAuth();
 initDarkMode();
+initSidebar();
 document.getElementById('logout').onclick = () => { clearToken(); localStorage.removeItem('user'); window.location='index.html'; };
 let taskPage = 1;
 const taskLimit = 10;

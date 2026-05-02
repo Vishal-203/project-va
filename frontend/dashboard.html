@@ -2,59 +2,95 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dashboard | AI Study Assistant</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<div class="navbar"><div>AI Study Assistant</div><div><a href="profile.html">Profile</a><a href="notebook.html">Notebook</a><a href="ai_assistant.html">AI Assistant</a><a href="planner.html">Planner</a><a href="#" id="logout">Logout</a></div></div>
-<div class="container">
-<section class="page-hero">
-  <p class="hero-kicker">Study Dashboard</p>
-  <h1>Welcome back.</h1>
-  <p class="hero-subtitle">Check your momentum, open your latest notes, and jump straight into the next thing you want to study.</p>
-</section>
-
-<div class="grid-2">
-  <div class="card">
-    <h3>Profile</h3>
-    <p class="section-intro">Your account details and a shortcut to settings.</p>
-    <p id="user-name" style="font-size:1.25rem; color:var(--brand-strong); font-weight:700;"></p>
-    <p id="user-email" style="color:var(--text-faint);"></p>
-    <a href="profile.html" class="btn">View Profile</a>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <span>AI Study Assistant</span>
+    <button class="sidebar-close" id="sidebar-close">✕</button>
   </div>
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="active" data-page="dashboard">Dashboard</a>
+    <a href="notebook.html" data-page="notebook">Notebook</a>
+    <a href="ai_assistant.html" data-page="ai_assistant">AI Assistant</a>
+    <a href="planner.html" data-page="planner">Planner</a>
+    <a href="profile.html" data-page="profile">Profile</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="#" id="logout">Logout</a>
+  </div>
+</div>
 
-  <div class="card">
-    <h3>Quick Stats</h3>
-    <p class="section-intro">A live snapshot of your notes and planner activity.</p>
-    <div id="quick-stats">
-      <p>Loading stats...</p>
+<!-- Sidebar Overlay (for mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar Toggle (for mobile) -->
+<button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+
+<!-- Floating AI Button (top-right) -->
+<button class="ai-floating-btn" id="ai-chat-btn" title="Ask AI Assistant">🤖</button>
+
+<!-- AI Chat Modal -->
+<div class="ai-chat-modal" id="ai-chat-modal">
+  <div class="ai-chat-header">
+    <span>🤖 AI Assistant</span>
+    <button class="ai-chat-close" id="ai-chat-close">✕</button>
+  </div>
+  <div class="ai-chat-messages" id="ai-chat-messages">
+    <div class="ai-msg ai-msg-bot">How can I help you?</div>
+  </div>
+  <div class="ai-chat-input">
+    <input type="text" id="ai-chat-input" placeholder="Type your message..." />
+    <button class="btn" id="ai-chat-send">Send</button>
+  </div>
+</div>
+<!-- Chat Modal Overlay -->
+<div class="ai-chat-overlay" id="ai-chat-overlay"></div>
+
+<div class="container">
+  <section class="page-hero">
+    <p class="hero-kicker">Study Dashboard</p>
+    <h1>Welcome back.</h1>
+    <p class="hero-subtitle">Check your momentum, open your latest notes, and jump straight into the next thing you want to study.</p>
+  </section>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Profile</h3>
+      <p class="section-intro">Your account details and a shortcut to settings.</p>
+      <p id="user-name" style="font-size:1.25rem; color:var(--brand-strong); font-weight:700;"></p>
+      <p id="user-email" style="color:var(--text-faint);"></p>
+      <a href="profile.html" class="btn">View Profile</a>
+    </div>
+
+    <div class="card">
+      <h3>Quick Stats</h3>
+      <p class="section-intro">A live snapshot of your notes and planner activity.</p>
+      <div id="quick-stats">
+        <p>Loading stats...</p>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="card">
-  <h3>Quick Actions</h3>
-  <p class="section-intro">Move into the part of the workspace you need right now.</p>
-  <div class="action-grid">
-    <button class="btn" onclick="window.location='notebook.html'">Create Note</button>
-    <button class="btn" onclick="window.location='planner.html'">Add Task</button>
-    <button class="btn" onclick="window.location='ai_assistant.html'">Ask AI</button>
-    <button class="btn" onclick="window.location='profile.html'">Settings</button>
-  </div>
-</div>
 
-<div class="card">
-  <h3>Recent Notes</h3>
-  <p class="section-intro">Your latest notebook entries, ready to reopen.</p>
-  <div id="recent-notes-container">
-    <p>Loading your notes...</p>
+
+  <div class="card">
+    <h3>Recent Notes</h3>
+    <p class="section-intro">Your latest notebook entries, ready to reopen.</p>
+    <div id="recent-notes-container">
+      <p>Loading your notes...</p>
+    </div>
   </div>
-</div>
 </div>
 <script src="app.js"></script>
 <script>
 requireAuth();
 initDarkMode();
+initSidebar();
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 if(user.name){
   document.getElementById('user-name').textContent = user.name;
@@ -109,6 +145,65 @@ document.getElementById('logout').onclick = () => {
 
 loadStats();
 loadRecentNotes();
+
+// AI Chat Modal functionality
+const aiChatBtn = document.getElementById('ai-chat-btn');
+const aiChatModal = document.getElementById('ai-chat-modal');
+const aiChatOverlay = document.getElementById('ai-chat-overlay');
+const aiChatClose = document.getElementById('ai-chat-close');
+const aiChatInput = document.getElementById('ai-chat-input');
+const aiChatSend = document.getElementById('ai-chat-send');
+const aiChatMessages = document.getElementById('ai-chat-messages');
+
+function openAiChat() {
+  aiChatModal.classList.add('active');
+  aiChatOverlay.classList.add('active');
+  aiChatInput.focus();
+}
+
+function closeAiChat() {
+  aiChatModal.classList.remove('active');
+  aiChatOverlay.classList.remove('active');
+}
+
+function addMessage(text, isBot = true) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'ai-msg ' + (isBot ? 'ai-msg-bot' : 'ai-msg-user');
+  msgDiv.textContent = text;
+  aiChatMessages.appendChild(msgDiv);
+  aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const message = aiChatInput.value.trim();
+  if (!message) return;
+  
+  addMessage(message, false);
+  aiChatInput.value = '';
+  
+  const sendBtn = document.getElementById('ai-chat-send');
+  sendBtn.disabled = true;
+  sendBtn.textContent = '...';
+  
+  const res = await apiFetch('/ai/chat', 'POST', { message: message });
+  
+  sendBtn.disabled = false;
+  sendBtn.textContent = 'Send';
+  
+  if (res.success && res.data && res.data.answer) {
+    addMessage(res.data.answer, true);
+  } else {
+    addMessage('Sorry, I could not process your request. Please try again.', true);
+  }
+}
+
+aiChatBtn.addEventListener('click', openAiChat);
+aiChatClose.addEventListener('click', closeAiChat);
+aiChatOverlay.addEventListener('click', closeAiChat);
+aiChatSend.addEventListener('click', sendChatMessage);
+aiChatInput.addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') sendChatMessage();
+});
 </script>
 </body>
 </html>

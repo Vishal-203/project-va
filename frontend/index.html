@@ -34,14 +34,23 @@
 <script src="app.js"></script>
 <script>
 const loginBtn = document.getElementById('login-btn');
-loginBtn.onclick = async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+
+const handleLogin = async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
   const result = await apiFetch('/auth/login', 'POST', { email, password });
   if (!result.success) { showMsg(document.getElementById('login-msg'), result.message); return; }
   setToken(result.data.token); localStorage.setItem('user', JSON.stringify(result.data.user));
   window.location.href='dashboard.html';
 };
+
+loginBtn.onclick = handleLogin;
+
+// Allow Enter key to trigger login from either input field
+emailInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
 </script>
 </body>
 </html>
