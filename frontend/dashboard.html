@@ -2,111 +2,114 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dashboard | AI Study Assistant</title>
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<!-- Sidebar -->
-<div class="sidebar" id="sidebar">
-  <div class="sidebar-header">
-    <span>AI Study Assistant</span>
-    <button class="sidebar-close" id="sidebar-close">✕</button>
-  </div>
-  <nav class="sidebar-nav">
-    <a href="dashboard.html" class="active" data-page="dashboard">Dashboard</a>
-    <a href="notebook.html" data-page="notebook">Notebook</a>
-    <a href="ai_assistant.html" data-page="ai_assistant">AI Assistant</a>
-    <a href="planner.html" data-page="planner">Planner</a>
-    <a href="profile.html" data-page="profile">Profile</a>
-  </nav>
-  <div class="sidebar-footer">
-    <a href="#" id="logout">Logout</a>
-  </div>
-</div>
-
-<!-- Sidebar Overlay (for mobile) -->
-<div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-<!-- Sidebar Toggle (for mobile) -->
-<button class="sidebar-toggle" id="sidebar-toggle">☰</button>
-
-<!-- Floating AI Button (top-right) -->
-<button class="ai-floating-btn" id="ai-chat-btn" title="Ask AI Assistant">🤖</button>
-
-<!-- AI Chat Modal -->
-<div class="ai-chat-modal" id="ai-chat-modal">
-  <div class="ai-chat-header">
-    <span>🤖 AI Assistant</span>
-    <button class="ai-chat-close" id="ai-chat-close">✕</button>
-  </div>
-  <div class="ai-chat-messages" id="ai-chat-messages">
-    <div class="ai-msg ai-msg-bot">How can I help you?</div>
-  </div>
-  <div class="ai-chat-input">
-    <input type="text" id="ai-chat-input" placeholder="Type your message..." />
-    <button class="btn" id="ai-chat-send">Send</button>
-  </div>
-</div>
-<!-- Chat Modal Overlay -->
-<div class="ai-chat-overlay" id="ai-chat-overlay"></div>
-
-<div class="container">
-  <section class="page-hero">
-    <p class="hero-kicker">Study Dashboard</p>
-    <h1>Welcome back.</h1>
-    <p class="hero-subtitle">Check your momentum, open your latest notes, and jump straight into the next thing you want to study.</p>
-  </section>
-
-  <div class="grid-2">
-    <div class="card">
-      <h3>Profile</h3>
-      <p class="section-intro">Your account details and a shortcut to settings.</p>
-      <p id="user-name" style="font-size:1.25rem; color:var(--brand-strong); font-weight:700;"></p>
-      <p id="user-email" style="color:var(--text-faint);"></p>
-      <a href="profile.html" class="btn">View Profile</a>
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="pulse-node" style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
+      <span>Neural Flow</span>
     </div>
+    <nav class="nav-links">
+      <a href="dashboard.html" class="active"><span>📊</span> Dashboard</a>
+      <a href="notebook.html"><span>📓</span> Notes</a>
+      <a href="ai_assistant.html"><span>🧠</span> AI Assistant</a>
+      <a href="planner.html"><span>✅</span> Tasks</a>
+      <a href="profile.html"><span>👤</span> Profile</a>
+      <a href="#" id="logout-sidebar"><span>🚪</span> Logout</a>
+    </nav>
+  </aside>
 
-    <div class="card">
-      <h3>Quick Stats</h3>
-      <p class="section-intro">A live snapshot of your notes and planner activity.</p>
-      <div id="quick-stats">
-        <p>Loading stats...</p>
+  <main class="main-content">
+    <section class="page-hero">
+      <p class="auth-kicker">Study Dashboard</p>
+      <h1>Welcome back.</h1>
+      <p class="section-intro">Your neural network of knowledge is ready. Check your momentum and resume your progress.</p>
+    </section>
+
+    <div class="highlight-card card">
+      <p class="auth-kicker">Status: Optimal</p>
+      <h2 id="checkpoint-heading">Ready for your next session.</h2>
+      <p class="section-intro" id="checkpoint-copy">Pick up where you left off with a focused study path.</p>
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <span class="badge badge-success" id="checkpoint-task">Focus Session</span>
+        <span class="badge badge-warning" id="checkpoint-count">Priority Tasks</span>
+        <span class="badge badge-success" id="checkpoint-note">Quick Summary</span>
+      </div>
+      <div class="grid-2">
+        <div class="card" style="margin-bottom: 0;">
+          <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Next deadline</p>
+          <p id="checkpoint-deadline" style="font-weight: 700;">No upcoming deadline</p>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+          <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Latest note</p>
+          <p id="checkpoint-note-preview" style="font-weight: 700;">No recent notes</p>
+        </div>
+      </div>
+      <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+        <button class="btn" id="checkpoint-action">Open Planner</button>
+        <button class="btn btn-secondary" id="checkpoint-note-action">Open Notebook</button>
       </div>
     </div>
-  </div>
 
+    <div class="grid-2">
+      <div class="card">
+        <h3>System Stats</h3>
+        <p class="section-intro">Real-time study metrics.</p>
+        <div id="quick-stats">
+          <p>Analyzing system data...</p>
+        </div>
+      </div>
 
-
-  <div class="card">
-    <h3>Recent Notes</h3>
-    <p class="section-intro">Your latest notebook entries, ready to reopen.</p>
-    <div id="recent-notes-container">
-      <p>Loading your notes...</p>
+      <div class="card">
+        <h3>Active Tasks</h3>
+        <p class="section-intro">Your top priorities for this cycle.</p>
+        <div class="action-grid" style="display: grid; grid-template-columns: 1fr; gap: 0.5rem;">
+           <!-- Tasks will be injected here if I had a list, but for now I'll just keep the buttons -->
+           <button class="btn" onclick="window.location='planner.html'">Manage All Tasks</button>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <div class="card">
+      <h3>Knowledge Nodes</h3>
+      <p class="section-intro">Recently modified information structures.</p>
+      <div id="recent-notes-container">
+        <p>Fetching notes from network...</p>
+      </div>
+    </div>
+  </main>
 </div>
+
 <script src="app.js"></script>
+<script src="neural-bg.js"></script>
 <script>
 requireAuth();
 initDarkMode();
-initSidebar();
-const user = JSON.parse(localStorage.getItem('user') || '{}');
-if(user.name){
-  document.getElementById('user-name').textContent = user.name;
-  document.getElementById('user-email').textContent = user.email;
-}
+
+document.getElementById('logout-sidebar').onclick = (e) => {
+  e.preventDefault();
+  clearToken();
+  localStorage.removeItem('user');
+  window.location = 'index.html';
+};
 
 async function loadStats() {
   const res = await apiFetch('/user/stats');
   if(res.success) {
     const s = res.data;
     document.getElementById('quick-stats').innerHTML = `
-      <div class="stat-grid">
-        <div class="stat-tile"><span class="stat-label">Notes</span><span class="stat-value">${s.notes}</span></div>
-        <div class="stat-tile"><span class="stat-label">Total Tasks</span><span class="stat-value">${s.total_tasks}</span></div>
-        <div class="stat-tile"><span class="stat-label">Completed</span><span class="stat-value">${s.completed_tasks}</span></div>
-        <div class="stat-tile"><span class="stat-label">Pending</span><span class="stat-value">${s.pending_tasks}</span></div>
+      <div class="grid-2">
+        <div style="padding: 1rem; border-left: 2px solid var(--primary);">
+          <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">NOTES</span>
+          <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${s.notes}</span>
+        </div>
+        <div style="padding: 1rem; border-left: 2px solid var(--primary);">
+          <span style="display: block; font-size: 0.8rem; color: var(--text-muted);">PENDING</span>
+          <span style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">${s.pending_tasks}</span>
+        </div>
       </div>
     `;
   }
@@ -118,92 +121,69 @@ async function loadRecentNotes() {
   const items = Array.isArray(res?.data?.items) ? res.data.items : Array.isArray(res?.data) ? res.data : [];
 
   if(res.success && items.length > 0) {
-    container.innerHTML = '<ul>';
-    items.slice(0, 5).forEach(n => {
+    let html = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+    items.slice(0, 3).forEach(n => {
       const date = new Date(n.updated_at).toLocaleDateString();
-      container.innerHTML += `
-        <li style="padding:0.9rem 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+      html += `
+        <div class="card" style="margin-bottom: 0; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary);">
           <div>
-            <strong style="color:var(--text);">${n.subject}</strong><br>
-            <small>${n.topic} • ${date}</small>
+            <div style="font-weight: 700; color: var(--text-main);">${n.subject}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${n.topic} • ${date}</div>
           </div>
-          <span style="color:var(--brand); font-weight:700;">Open</span>
-        </li>
+          <a href="notebook.html" class="btn btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.7rem;">Access</a>
+        </div>
       `;
     });
-    container.innerHTML += '</ul>';
+    html += '</div>';
+    container.innerHTML = html;
   } else if(res.success) {
-    container.innerHTML = '<p class="empty-state">No notes yet. <a href="notebook.html">Create your first note</a>.</p>';
+    container.innerHTML = '<p class="section-intro">No knowledge nodes found. <a href="notebook.html" style="color: var(--primary);">Initialize your first note</a>.</p>';
   }
 }
 
-document.getElementById('logout').onclick = () => {
-  clearToken();
-  localStorage.removeItem('user');
-  window.location = 'index.html';
-};
+async function loadCheckpoint() {
+  const taskRes = await apiFetch('/tasks?limit=1');
+  const noteRes = await apiFetch('/notes?limit=1');
+  const statsRes = await apiFetch('/user/stats');
+
+  const checkpointTask = document.getElementById('checkpoint-task');
+  const checkpointCount = document.getElementById('checkpoint-count');
+  const checkpointNote = document.getElementById('checkpoint-note');
+  const checkpointHeading = document.getElementById('checkpoint-heading');
+  const checkpointCopy = document.getElementById('checkpoint-copy');
+  const checkpointAction = document.getElementById('checkpoint-action');
+  const checkpointNoteAction = document.getElementById('checkpoint-note-action');
+  const checkpointDeadline = document.getElementById('checkpoint-deadline');
+  const checkpointNotePreview = document.getElementById('checkpoint-note-preview');
+
+  const nextTask = taskRes.success && Array.isArray(taskRes.data?.items) && taskRes.data.items[0];
+  const latestNote = noteRes.success && Array.isArray(noteRes.data?.items) && noteRes.data.items[0];
+  const pendingTasks = statsRes.success ? statsRes.data.pending_tasks : null;
+
+  if (nextTask) {
+    checkpointTask.textContent = nextTask.title;
+    checkpointHeading.textContent = 'Neural match: Next task ready';
+    checkpointCopy.textContent = `Resume your focus cycle with: ${nextTask.title}.`;
+    checkpointDeadline.textContent = nextTask.deadline ? nextTask.deadline : 'Continuous';
+    checkpointAction.textContent = 'Go to Planner';
+  }
+
+  if (pendingTasks !== null) {
+    checkpointCount.textContent = `${pendingTasks} Active Tasks`;
+  }
+
+  if (latestNote) {
+    checkpointNote.textContent = latestNote.subject;
+    checkpointNotePreview.textContent = latestNote.topic || 'General knowledge';
+  }
+
+  checkpointAction.onclick = () => window.location = 'planner.html';
+  checkpointNoteAction.onclick = () => window.location = 'notebook.html';
+}
 
 loadStats();
 loadRecentNotes();
-
-// AI Chat Modal functionality
-const aiChatBtn = document.getElementById('ai-chat-btn');
-const aiChatModal = document.getElementById('ai-chat-modal');
-const aiChatOverlay = document.getElementById('ai-chat-overlay');
-const aiChatClose = document.getElementById('ai-chat-close');
-const aiChatInput = document.getElementById('ai-chat-input');
-const aiChatSend = document.getElementById('ai-chat-send');
-const aiChatMessages = document.getElementById('ai-chat-messages');
-
-function openAiChat() {
-  aiChatModal.classList.add('active');
-  aiChatOverlay.classList.add('active');
-  aiChatInput.focus();
-}
-
-function closeAiChat() {
-  aiChatModal.classList.remove('active');
-  aiChatOverlay.classList.remove('active');
-}
-
-function addMessage(text, isBot = true) {
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'ai-msg ' + (isBot ? 'ai-msg-bot' : 'ai-msg-user');
-  msgDiv.textContent = text;
-  aiChatMessages.appendChild(msgDiv);
-  aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
-}
-
-async function sendChatMessage() {
-  const message = aiChatInput.value.trim();
-  if (!message) return;
-  
-  addMessage(message, false);
-  aiChatInput.value = '';
-  
-  const sendBtn = document.getElementById('ai-chat-send');
-  sendBtn.disabled = true;
-  sendBtn.textContent = '...';
-  
-  const res = await apiFetch('/ai/chat', 'POST', { message: message });
-  
-  sendBtn.disabled = false;
-  sendBtn.textContent = 'Send';
-  
-  if (res.success && res.data && res.data.answer) {
-    addMessage(res.data.answer, true);
-  } else {
-    addMessage('Sorry, I could not process your request. Please try again.', true);
-  }
-}
-
-aiChatBtn.addEventListener('click', openAiChat);
-aiChatClose.addEventListener('click', closeAiChat);
-aiChatOverlay.addEventListener('click', closeAiChat);
-aiChatSend.addEventListener('click', sendChatMessage);
-aiChatInput.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') sendChatMessage();
-});
+loadCheckpoint();
 </script>
 </body>
 </html>
