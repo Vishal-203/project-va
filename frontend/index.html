@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="auth-page">
+<!-- Welcome Animation Overlay -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-text" id="welcome-text">welcome to your ai study assistant</div>
+</div>
+
 <nav class="navbar">
   <div class="logo">Neural Flow</div>
   <a href="register.html">Register</a>
@@ -42,6 +47,33 @@
 <script src="app.js"></script>
 <script src="neural-bg.js"></script>
 <script>
+// Welcome Animation on Page Load
+document.addEventListener('DOMContentLoaded', function() {
+  const overlay = document.getElementById('welcome-overlay');
+  const text = document.getElementById('welcome-text');
+  
+  // Check if this is the first visit (not from login/redirect)
+  const hasVisited = sessionStorage.getItem('hasVisitedBefore');
+  
+  if (!hasVisited) {
+    // First visit - show the welcome animation
+    setTimeout(function() {
+      overlay.classList.add('active');
+      text.classList.add('animate-glow');
+      
+      // Hide after 3 seconds
+      setTimeout(function() {
+        overlay.classList.remove('active');
+        overlay.classList.add('hidden');
+        sessionStorage.setItem('hasVisitedBefore', 'true');
+      }, 3000);
+    }, 100);
+  } else {
+    // Already visited - don't show animation
+    overlay.style.display = 'none';
+  }
+});
+
 const loginBtn = document.getElementById('login-btn');
 loginBtn.onclick = async () => {
   const email = document.getElementById('email').value.trim();
